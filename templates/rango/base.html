@@ -3,6 +3,7 @@
 {% load rango_template_tags %}
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>
             Rango -
             {% block title_block %}
@@ -11,11 +12,12 @@
         </title>
     </head>
     <body>
-        <div>
+        {% include 'rango/header.html' %}
+        <div class="page-main">
             {% block body_block %}
             {% endblock %}
         </div>
-        <div>
+        <div class="page-main">
             {% block sidebar_block %}
                 {% get_category_list %}
             {% endblock %}

@@ -1,0 +1,50 @@
+.profile_logged_in,
+.profile_logged_out {
+    position: relative;
+    flex: 0 0 auto;
+    border-color: #1b4ca8;
+}
+
+.dropdown_logged_in,
+.dropdown_logged_out {
+    background:#1b4ca8;
+    color: #fff;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border-color: #1b4ca8;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.Logged_in_content,
+.Logged_out_content {
+    display: none;
+    position: absolute;
+    right: 0;
+    min-width: 170px;
+    background: #4681ff;
+    border-radius: 10px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.Logged_in_content a,
+.Logged_out_content a {
+    display: block;
+    padding: 0.55rem 0.75rem;
+    color: #1b2a4a;
+    text-decoration: none;
+}
+
+.Logged_in_content a:hover,
+.Logged_out_content a:hover {
+    background: #1000e9;
+    color: #fff;
+}
+
+.profile_logged_in:hover .Logged_in_content,
+.profile_logged_in:focus-within .Logged_in_content,
+.profile_logged_out:hover .Logged_out_content,
+.profile_logged_out:focus-within .Logged_out_content {
+    display: block;
+}

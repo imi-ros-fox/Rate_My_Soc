@@ -1,0 +1,32 @@
+
+    .site-header {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0.85rem;
+        background: #f5f7fb;
+        border-bottom: 3px solid #10234e;
+        position: sticky;
+        top: 0;
+    }
+    .Create_Soc {
+        margin-right: 1rem;
+        padding: 0.4rem 0.8rem;
+        background: #1b4ca8;
+        color: #fff;
+        border: 0;
+        border-radius: 999px;
+        font-weight: 600;
+
+    } 
+
+    .site-logo img {
+        width: 75px;
+        height: 75px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+
+.page-main {
+    padding: 1rem;
+}
