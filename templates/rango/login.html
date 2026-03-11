@@ -6,13 +6,69 @@
 {% endblock %}
 
 {% block body_block %}
-    <h1>Login to Rango</h1>
-    <form id = "login_form" method="post" action="{% url 'rango:login' %}">
-        {% csrf_token %}
-        Username: <input type="text" name= "username" value="" size="50"/>
-        <br />
-        Password: <input type="password" name= "password" value="" size="50"/>
-        <br />
-        <input type="submit" value="submit" />
-    </form>
+    <div class="page auth-page">
+        <div class="auth-card">
+            <h1>Log In</h1>
+            <form id="login_form" method="post" action="{% url 'rango:login' %}">
+                {% csrf_token %}
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" value="">
+
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" value="">
+
+                <button class="submit-btn" type="submit">Log In</button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .auth-page {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 120px);
+        }
+
+        .auth-card {
+            width: min(420px, 100%);
+            padding: 1.5rem;
+            border: 1px solid #d7d7d7;
+            border-radius: 12px;
+            background: #d2eaff;
+        }
+
+        .auth-card h1 {
+            margin-bottom: 1rem;
+        }
+
+        .auth-card form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .auth-card label {
+            font-weight: 600;
+        }
+
+        .auth-card input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 0;
+            border-radius: 8px;
+            background: #add9ff;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            margin-top: 0.5rem;
+            width: fit-content;
+            padding: 0.6rem 1rem;
+            border: 0;
+            border-radius: 8px;
+            background: #000000;
+            color: #ffffff;
+            cursor: pointer;
+        }
+    </style>
 {% endblock %}
