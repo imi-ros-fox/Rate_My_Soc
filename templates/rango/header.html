@@ -19,7 +19,9 @@
         </form>
     </div>
     {% if user.is_authenticated %}
-        <button class= "Create_Soc" action="#">Create Socity</button>
+        <form class="create-soc-form" method="get" action="{% url 'rango:create_Soc' %}">
+            <button class="Create_Soc" type="submit">Create a Society</button>
+        </form>
         <div class="profile_logged_in">
             <button class= "dropdown_logged_in">Profile</button>
             <div class="Logged_in_content">
