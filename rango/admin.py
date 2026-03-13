@@ -1,6 +1,6 @@
 from django.contrib import admin
 #from rango.models import Category, Page
-from rango.models import UserProfile
+from rango.models import UserProfile, Society, Upvote, Review, Category
 
 # class PageAdmin(admin.ModelAdmin):
 #     list_display = ('title','category', 'url')
@@ -13,3 +13,7 @@ from rango.models import UserProfile
 # admin.site.register(Page, PageAdmin)
 
 admin.site.register(UserProfile)
+admin.site.register(Society)
+admin.site.register(Upvote)
+admin.site.register(Review)
+admin.site.register(Category)

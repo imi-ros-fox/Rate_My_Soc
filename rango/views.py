@@ -1,7 +1,10 @@
 from datetime import datetime
 from urllib import response
+
+from django.contrib.auth.models import User
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.template import context
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -12,9 +15,8 @@ import os
 #from rango.models import Page
 #from rango.forms import CategoryForm
 #from rango.forms import PageForm
-from rango.forms import UserForm, UserProfileForm
-
-
+from rango.forms import UserForm, UserProfileForm, SocietyForm
+from .models import UserProfile, Society, Category
 
 
 def index(request):
@@ -181,7 +183,7 @@ def user_login(request):
 def profile_view(request, username):
     try:
         user = User.objects.get(username=username)
-        profile = UserProfile.objects,get(user=user)
+        profile = UserProfile.objects.get(user=user)
     except User.DoesNotExist:
         messages.error(request, 'User not found')
         return redirect('rango:index')
@@ -271,3 +273,87 @@ def visitor_cookie_handler(request):
     else:
         request.session['last_visit'] = last_visit_cookie
     request.session['visits'] = visits
+
+@login_required
+def create_soc(request):
+    categories = Category.objects.all()
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        image = request.FILES.get('image')
+        category_ids = request.POST.getlist('tags[]')
+
+        if not name or not description or not category_ids:
+            messages.error(request, 'Please fill in all required fields and select at least one category.')
+            return render(request, 'rango/create_soc.html', {'categories': categories})
+
+        society = Society.objects.create(
+            name=name,
+            description=description,
+            image=image,
+            created_by=request.user
+        )
+        society.categories.set(category_ids)
+        society.save()
+
+        messages.success(request, f'Society "{society.name}" created successfully!')
+        return redirect('rango:index')
+
+    return render(request, 'rango/create_soc.html', {'categories': categories})
+
+@login_required
+def society_list(request):
+    societies = Society.objects.all()
+    return render(request, 'rango/society_list.html', {'societies': societies})
+
+@login_required
+def create_society(request):
+    if request.method == 'POST':
+        form = SocietyForm(request.POST, request.FILES)
+        if form.is_valid():
+            society = form.save(commit=False)
+            society.created_by = request.user
+            society.save()
+            form.save_m2m()
+            messages.success(request, 'Society created successfully!')
+            return redirect('rango:society_list')
+    else:
+        form = SocietyForm()
+    return render(request, 'rango/create_society.html', {'form': form})
+
+@login_required
+def edit_society(request, pk):
+    society = get_object_or_404(Society, pk=pk)
+    if request.user != society.created_by:
+        messages.error(request, 'You are not allowed to edit this society.')
+        return redirect('rango:society_list')
+
+    if request.method == 'POST':
+        form = SocietyForm(request.POST, request.FILES, instance=society)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Society updated successfully!')
+            return redirect('rango:society_list')
+    else:
+        form = SocietyForm(instance=society)
+    return render(request, 'rango/edit_society.html', {'form': form, 'society': society})
+
+@login_required
+def delete_society(request, pk):
+    society = get_object_or_404(Society, pk=pk)
+    if request.user != society.created_by:
+        messages.error(request, 'You are not allowed to delete this society.')
+        return redirect('rango:society_list')
+
+    if request.method == 'POST':
+        society.delete()
+        messages.success(request, 'Society deleted successfully!')
+        return redirect('rango:society_list')
+
+    return render(request, 'rango/delete_society.html', {'society': society})
+
+@login_required
+def society_detail(request, pk):
+    society = get_object_or_404(Society, pk=pk)
+    return render(request, 'rango/society_detail.html', {'society': society})

@@ -1,0 +1,21 @@
+<!-- templates/rango/society_detail.html -->
+{% extends 'rango/base.html' %}
+{% block title_block %}{{ society.name }}{% endblock %}
+
+{% block body_block %}
+<h1>{{ society.name }}</h1>
+
+{% if society.image %}
+    <img src="{{ society.image.url }}" alt="{{ society.name }}" style="max-width:200px;">
+{% endif %}
+
+<p><strong>Created by:</strong> {{ society.created_by.username }}</p>
+<p><strong>Categories:</strong>
+    {% for cat in society.categories.all %}
+        {{ cat.name }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</p>
+<p><strong>Description:</strong> {{ society.description }}</p>
+
+<a href="{% url 'rango:society_list' %}">Back to societies list</a>
+{% endblock %}

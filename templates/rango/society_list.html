@@ -1,0 +1,21 @@
+{% extends 'rango/base.html' %}
+{% block title_block %}Societies{% endblock %}
+
+{% block body_block %}
+<h1>All Societies</h1>
+<a href="{% url 'rango:create_society' %}">Create New Society</a>
+<ul>
+    {% for society in societies %}
+    <li>
+        <strong><a href="{% url 'rango:society_detail' society.pk %}">{{ society.name }}</a></strong>
+        - Categories: {% for cat in society.categories.all %}{{ cat.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        {% if society.created_by == user %}
+        | <a href="{% url 'rango:edit_society' society.pk %}">Edit</a>
+        | <a href="{% url 'rango:delete_society' society.pk %}">Delete</a>
+        {% endif %}
+    </li>
+    {% empty %}
+    <li>No societies yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
