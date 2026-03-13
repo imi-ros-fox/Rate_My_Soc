@@ -5,12 +5,15 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+import os
 
 from rango.models import Category
 from rango.models import Page
 from rango.forms import CategoryForm
 from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm
+
 
 
 
@@ -81,19 +84,43 @@ def add_page(request, category_name_slug):
 
 def register(request):
     registered = False
+
     if request.method == 'POST':
         user_form = UserForm(request.POST)
-        profile_form = UserProfileForm(request.POST)
+        profile_form = UserProfileForm(request.POST, request.FILES)
+
         if user_form.is_valid() and profile_form.is_valid():
+            #Password strength checker
+            password = user_form.cleaned_data.get('password')
+            if len(password) < 8:
+                messages.error(request, 'Password must be at least 8 characters long')
+                #Need to solve this error
+                return render(request, 'rango/register.html', context)
+
             user = user_form.save()
             user.set_password(user.password)
             user.save()
+
             profile = profile_form.save(commit=False)
             profile.user = user
+
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']
+
+            profile.role = profile_form.cleaned_data.get('role', 'STUDENT')
             profile.save()
+
+            login(request, user) #Auto-login the user
             registered = True
+
+            #Different login messages based on role
+            if profile.role == 'PRESIDENT':
+                messages.success(request, 'Welcome to Rate My Society! You can now create and manage societies.')
+            else:
+                messages.success(request, 'Welcome to Rate My Society! You can now start exploring and reviewing societies.')
+            
+            #After the user has successfully registered, they are sent to the homepage
+            return redirect(reverse('rango:index')) 
         else:
             print(user_form.errors, profile_form.errors)
     else:
@@ -110,19 +137,113 @@ def user_login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user =authenticate(username=username, password = password)
+
+        #Added a remember me feature
+        remember_me = request.POST.get('remember_me')
+
+        user = authenticate(username=username, password = password)
+
         if user:
             if user.is_active:
                 login(request, user)
+
+                #Users login details are remembered for 2 weeks
+                if remember_me:
+                    request.session.set_expiry(1209600)
+                else:
+                    request.session.set_expiry(0)
+
+                #Checks to see whether user is student or president
+                try:
+                    request.session['user_role'] = user.userprofile.role
+                except UserProfileForm.DoesNotExist:
+                    UserProfile.objects.create(user=user)
+                    request.session['user_role'] = 'STUDENT'
+                
+                messages.success(request, f'Welcome back, {user.username}')
+
+                #Makes sure if user is not logged in  when reviewing, they are forced to log in and then be redirected to review page instead of homepage
+                next_url = request.POST.get('next') or request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+
                 return redirect(reverse('rango:index'))
             else:
-                return HttpResponse("Your Rango account is disabled.")
+                return HttpResponse("Your Rate my Society account is disabled.")
         else:
             print(f"Invalid login details: {username}, {password}")
             return HttpResponse("Invalid login details supplied.")
     else:
         return render(request, 'rango/login.html')
 
+#Created a new profile view
+@login_required
+def profile_view(request, username):
+    try:
+        user = User.objects.get(username=username)
+        profile = UserProfile.objects,get(user=user)
+    except User.DoesNotExist:
+        messages.error(request, 'User not found')
+        return redirect('rango:index')
+    except UserProfile.DoesNotExist:
+        #Create a profile if it doesn't exist
+        profile = UserProfile.objects.create(user=user)
+
+    if profile.role == 'PRESIDENT':
+        societies_managed = []
+    else:
+        societies_managed = []
+    
+    context = {
+        'profile_user': user,
+        'profile': profile,
+        'is_own_profile': request.user == user,
+        'societies_managed': societies_managed,
+    }
+
+    return render(request, 'rango/profile.html', context)
+
+#Created a new edit profile view
+from .forms import EditProfileForm
+
+@login_required
+def edit_profile(request):
+    try:
+        profile = request.user.userprofile
+    except UserProfile.DoesNotExist:
+        profile = UserProfile.objects.create(user=request.user)
+    
+    if request.method == 'POST':
+        form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Profile updated successfully')
+            return redirect('rango:profile', username=request.user.username)
+        else:
+            messages.error(request, 'Please fix the following errors')
+    else:
+        form = EditProfileForm(instance=profile)
+    
+    return render(request, 'rango/edit_profile.html', {'form': form})
+
+#Created a delete profile view
+
+@login_required
+def delete_profile(request):
+    if request.method == 'POST':
+        user = request.user
+        password = request.POST.get('password')
+
+        if not user.check_password(password):
+            messages.error(request, 'Incorrect password. Account is still active.')
+            return redirect('rango:edit_profile')
+        
+        #Logout and delete
+        logout(request)
+        user.delete()
+        messages.success(request, 'Account has been deleted.')
+        return redirect('rango:index')
+    return render(request, 'rango/delete_profile.html')
 
 @login_required
 def restricted(request):
@@ -132,6 +253,7 @@ def restricted(request):
 def user_logout(request):
     logout(request)
     return redirect(reverse('rango:index'))
+
 
 def get_server_side_cookie(request, cookie, default_val=None):
     val = request.session.get(cookie)
