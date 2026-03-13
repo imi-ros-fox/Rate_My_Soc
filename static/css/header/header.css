@@ -1,0 +1,42 @@
+
+.site-header {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.85rem;
+    background: #f5f7fb;
+    border-bottom: 3px solid #c7d8ff;
+    position: sticky;
+    top: 0;
+}
+
+.Create_Soc {
+    margin-right: 1rem;
+    padding: 0.4rem 0.8rem;
+    background: #1b4ca8;
+    color: #ffffff;
+    border: 0;
+    border-radius: 999px;
+    font-weight: 600;
+
+} 
+
+.Create_Soc a,
+.Create_Soc a:link,
+.Create_Soc a:visited,
+.Create_Soc a:hover,
+.Create_Soc a:active {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.site-logo img {
+    width: 75px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+
+.page-main {
+padding: 1rem;
+}

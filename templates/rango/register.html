@@ -6,18 +6,28 @@
 {% endblock %}
 
 {% block body_block %}
-    <h1>Register for Rango</h1>
-    {% if registered %}
-        Rango says: <strong>thank you for registering!</strong>
-        <a href="{% url 'rango:index' %}">Return to the homepage.</a><br />
-    {% else %}
-         Rango says: <strong>register here!</strong>
-        <form id="user_form" method="post" action="{% url 'rango:register' %}" 
-            enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ user_form.as_p }}
-            {{ profile_form.as_p }}
-            <input type="submit" name="submit" value="Register" />
-        </form>
-    {% endif %}
+    <link rel="stylesheet"  type="text/css" href="{% static 'css/Sign_up.css' %}">
+    <div class="page auth-page">
+        <div class="auth-card auth-card-register">
+            <h1>Register</h1>
+            {% if registered %}
+                <p>Thank you for registering.</p>
+                <a class="return-link" href="{% url 'rango:index' %}">Return to the homepage</a>
+            {% else %}
+                <p>Create your account below.</p>
+                <form id="user_form" method="post" action="{% url 'rango:register' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ user_form.as_p }}
+                    <p>
+                        <label for="confirm_password">Confirm password:</label>
+                        <input id="confirm_password" type="password" autocomplete="new-password" required>
+                    </p>
+                    <div class="auth-actions">
+                        <button class="submit-btn" type="submit" name="submit">Register</button>
+                        <a href="{% url 'rango:login' %}"> Log in instead</a>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

@@ -6,13 +6,24 @@
 {% endblock %}
 
 {% block body_block %}
-    <h1>Login to Rango</h1>
-    <form id = "login_form" method="post" action="{% url 'rango:login' %}">
-        {% csrf_token %}
-        Username: <input type="text" name= "username" value="" size="50"/>
-        <br />
-        Password: <input type="password" name= "password" value="" size="50"/>
-        <br />
-        <input type="submit" value="submit" />
-    </form>
+    <link rel="stylesheet"  type="text/css" href="{% static 'css/Sign_in.css' %}">
+    <div class="page auth-page">
+        <div class="auth-card">
+            <h1>Log In</h1>
+            <form id="login_form" method="post" action="{% url 'rango:login' %}">
+                {% csrf_token %}
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" value="">
+
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" value="">
+
+                <div class="auth-actions">
+                    <button class="submit-btn" type="submit">Log In</button>
+                    <a  href="{% url 'rango:register' %}">Sign Up instead</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
 {% endblock %}

@@ -1,0 +1,44 @@
+
+{% load staticfiles %}
+{% load rango_template_tags %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/header/header.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/header/dropdown_profile.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/header/searchbar.css' %}">
+<header class="site-header">
+    <a class="site-logo" href="{% url 'rango:index' %}">
+        <img src="{% static 'images/My Society.png' %}"
+            alt="My Society "/>
+    </a>
+
+    <div class="site-search-total">
+        <form class="site-search" method="get" action="{% url 'rango:about' %}"><!--this can be changed base on how search happens-->
+            <div class="site-search-group">
+                <input type="text" name="text" placeholder="Search societies">
+                <button type="submit">Search</button>
+            </div>
+        </form>
+    </div>
+    {% if user.is_authenticated %}
+        <form class="create-soc-form" method="get" action="{% url 'rango:create_Soc' %}">
+            <button class="Create_Soc" type="submit">Create a Society</button>
+        </form>
+        <div class="profile_logged_in">
+            <button class= "dropdown_logged_in">Profile</button>
+            <div class="Logged_in_content">
+                <a href="#">My Profile</a> <!--change # whwen profile page is ready-->
+                <a href="{% url 'rango:logout' %}">Log Out</a> <!--change # when logout page is ready-->
+            </div>
+        </div>
+    {% else %} 
+        <div class="profile_logged_out">
+            <button class= "dropdown_logged_out">Profile</button>
+            <div class="Logged_out_content">
+                <a href="{% url 'rango:register' %}">Sign up</a>
+                <a href="{% url 'rango:login' %}">Log In</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="site-header-spacer" aria-hidden="true"></div>
+</header>
+

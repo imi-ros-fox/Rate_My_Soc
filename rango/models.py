@@ -4,32 +4,45 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-# Create your models here.
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True)  # optional?
+    picture = models.ImageField(upload_to='profile_images', blank=True)
+    role = models.CharField(max_length=50, default='student')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class Category(models.Model):
-    name = models.CharField(max_length=128, unique=True)
-    views = models.IntegerField(default=0)
-    likes = models.IntegerField(default=0)
+    name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
-        super(Category, self).save(*args, **kwargs)
-    
-    class Meta:
-        verbose_name_plural = 'Categories'
-    
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
-    
 
-class Page(models.Model):
+
+class Society(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    description = models.TextField()
+    image = models.ImageField(upload_to='society_images', blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    title = models.CharField(max_length=128)
-    url = models.URLField()
-    views = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(unique=True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.title
+        return self.name
 
 class UserProfile(models.Model):
     ROLE_CHOICES = (
@@ -70,3 +83,8 @@ def save_user_profile(sender, instance, **kwargs):
     except UserProfile.DoesNotExist:
         UserProfile.objects.create(user=instance)
 
+    class Meta:
+        unique_together = ('user', 'review')  # one upvote per user per review
+
+    def __str__(self):
+        return f"{self.user.username} upvoted review {self.review.id}"
