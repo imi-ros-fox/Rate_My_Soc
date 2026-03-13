@@ -11,15 +11,16 @@ from django.contrib.auth.decorators import login_required
 #from rango.forms import CategoryForm
 #from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm
-
+from rango.models import Society
 
 
 def index(request):
    # category_list = Category.objects.order_by('-likes')[:5]
    # page_list = Page.objects.order_by('-views')[:5]
+    society_list = Society.objects.order_by('-views')[:5]
     context_dict = {}
     context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
-   # context_dict['categories'] = category_list
+    context_dict['societies'] = society_list
    # context_dict['pages'] = page_list
     visitor_cookie_handler(request)
     response = render(request, 'rango/index.html', context=context_dict)
@@ -78,6 +79,15 @@ def about(request):
 #             print(form.errors)
 #     context_dict = {'form': form, 'category': category}
 #     return render(request, 'rango/add_page.html', context=context_dict)
+
+def show_society(request, society_name_slug):
+    context_dict = {}
+    try:
+        society = Society.objects.get(slug=society_name_slug)
+        context_dict['society'] = society
+    except Society.DoesNotExist:
+        context_dict['society'] = None
+    return render(request, 'rango/society.html', context=context_dict)
 
 def register(request):
     registered = False

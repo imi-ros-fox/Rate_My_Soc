@@ -13,6 +13,14 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+class Society(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=300)
+    picture = models.ImageField(upload_to='society_images', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    views = models.IntegerField(default=0)
+    likes = models.IntegerField(default=0)
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -25,18 +33,13 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+        super(Society, self).save(*args, **kwargs)
 
-class Society(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    description = models.TextField()
-    image = models.ImageField(upload_to='society_images', blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    slug = models.SlugField(unique=True)
+    class Meta:
+        verbose_name_plural = 'Societies'
 
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.name)
+    def __str__(self):
+        return self.name
         super().save(*args, **kwargs)
 
     def __str__(self):
