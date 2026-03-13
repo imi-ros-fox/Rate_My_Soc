@@ -1,6 +1,8 @@
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Profile(models.Model):
@@ -42,32 +44,44 @@ class Society(models.Model):
     def __str__(self):
         return self.name
 
-    def average_rating(self):
-        reviews = self.review_set.all()
-        if reviews.exists():
-            return sum(review.rating for review in reviews) / reviews.count()
-        return 0
+class UserProfile(models.Model):
+    ROLE_CHOICES = (
+        ('STUDENT', 'Student'),
+        ('PRESIDENT', 'Society President'),
+    )
 
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    website = models.URLField(blank=True)
+    picture = models.ImageField(upload_to='profile_images', blank=True)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='STUDENT')
+    
+    #Added a bio - eg. in personas it mentions Ayaan might want to mention he's looking for beginner-friendly sports
+    bio = models.TextField(blank=True, max_length=500)
 
+    #Added a join date - could be used for filtering members? 
+    join_date = models.DateTimeField(auto_now_add=True)
 
-class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    society = models.ForeignKey(Society, on_delete=models.CASCADE)
-    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
-    comment = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'society')  # one review per user per society
+    #MIGHT WANT TO ADD FEATURES TO TRACK USER ACTIVITY HERE
 
     def __str__(self):
-        return f"{self.user.username} review of {self.society.name}"
+        return self.user.username
+    
+    class Meta:
+        verbose_name_plural = 'User Profiles'
+
+#Makes sure profiles are always created when a new user signs up
+@receiver
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
 
 
-class Upvote(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    review = models.ForeignKey(Review, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    try:
+        instance.userprofile.save()
+    except UserProfile.DoesNotExist:
+        UserProfile.objects.create(user=instance)
 
     class Meta:
         unique_together = ('user', 'review')  # one upvote per user per review
