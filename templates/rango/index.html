@@ -17,6 +17,20 @@
         <br />
         <strong>{{boldmessage}}</strong><br />
     </div>
+    <div>
+        <h2>Most Liked Societies</h2>
+        {% if societies %}
+            <ul>
+            {% for society in societies %}
+                <li>
+                    <a href="{% url 'rango:show_society' society.slug %}">{{ society.name }}</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p><strong>There are no categories present.</strong></p>
+        {% endif %}
+    </div>
 {#    <div>#}
 {#        <h2>Most Liked Categories</h2>#}
 {#    {% if categories %}#}
