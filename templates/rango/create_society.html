@@ -1,0 +1,15 @@
+<!-- templates/rango/create_society.html -->
+{% extends 'rango/base.html' %}
+{% block title_block %}Create Society{% endblock %}
+
+{% block body_block %}
+<h1>Create a New Society</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Society</button>
+</form>
+
+<a href="{% url 'rango:society_list' %}">Back to societies list</a>
+{% endblock %}

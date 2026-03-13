@@ -16,7 +16,7 @@
         <div class="tag-bubbles" id="tags">
             {% for category in categories %}
                 <label class="tag-bubble">
-                    <input type="checkbox" name="tags" value="{{ category.id }}">
+                    <input type="checkbox" name="tags[]" value="{{ category.id }}">
                     <span>{{ category.name }}</span>
                 </label>
             {% endfor %}
