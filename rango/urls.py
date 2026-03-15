@@ -16,15 +16,18 @@ urlpatterns = [
     path('restricted/', views.restricted, name='restricted'),
     path('logout/', views.user_logout, name='logout'),
     path('create_soc/', views.create_soc, name='create_Soc'),
+
     #society CRUD
-    # path('societies/', views.society_list, name='society_list'),
-    # path('society/create/', views.create_society, name='create_society'),
-    # path('society/<int:society_id>/', views.society_detail, name='society_detail'),
-    # path('society/<int:society_id>/edit/', views.edit_society, name='edit_society'),
-    # path('society/<int:society_id>/delete/', views.delete_society, name='delete_society'),
     path('societies/', views.society_list, name='society_list'),
     path('societies/create/', views.create_society, name='create_society'),
     path('societies/<int:pk>/edit/', views.edit_society, name='edit_society'),
     path('societies/<int:pk>/delete/', views.delete_society, name='delete_society'),
     path('societies/<int:pk>/', views.society_detail, name='society_detail'),
+
+    #Category CRUD
+    path('categories/', views.category_list, name='category_list'),
+    path('categories/create/', views.create_category, name='create_category'),
+    path('categories/<int:pk>/', views.category_detail, name='category_detail'),
+    path('categories/<int:pk>/edit/', views.edit_category, name='edit_category'),
+    path('categories/<int:pk>/delete/', views.delete_category, name='delete_category'),
 ]
