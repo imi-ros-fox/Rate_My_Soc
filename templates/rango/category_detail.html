@@ -1,0 +1,19 @@
+<h1>{{ category.name }}</h1>
+
+<h3>Societies in this category</h3>
+
+<ul>
+{% for society in societies %}
+
+<li>
+<a href="{% url 'rango:society_detail' society.pk %}">
+{{ society.name }}
+</a>
+</li>
+
+{% empty %}
+
+<li>No societies in this category yet</li>
+
+{% endfor %}
+</ul>

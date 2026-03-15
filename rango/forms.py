@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from rango.models import UserProfile, Society
+from rango.models import Category
 
 
 class UserForm(forms.ModelForm):
@@ -51,3 +52,8 @@ class SocietyForm(forms.ModelForm):
             'category': forms.CheckboxSelectMultiple(),
             'description': forms.Textarea(attrs={'rows':4}),
         }
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name']

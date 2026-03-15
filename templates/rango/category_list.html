@@ -1,0 +1,27 @@
+<h1>Categories</h1>
+
+<a href="{% url 'rango:create_category' %}">Create Category</a>
+
+<hr>
+
+{% for category in categories %}
+
+<div style="border:1px solid #ddd; padding:15px; margin-bottom:10px">
+
+    <h3>
+        <a href="{% url 'rango:category_detail' category.pk %}">
+            {{ category.name }}
+        </a>
+    </h3>
+
+    <a href="{% url 'rango:edit_category' category.pk %}">Edit</a>
+    |
+    <a href="{% url 'rango:delete_category' category.pk %}">Delete</a>
+
+</div>
+
+{% empty %}
+
+<p>No categories yet.</p>
+
+{% endfor %}

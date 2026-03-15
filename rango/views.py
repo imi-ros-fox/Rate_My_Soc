@@ -15,7 +15,7 @@ import os
 #from rango.models import Page
 #from rango.forms import CategoryForm
 #from rango.forms import PageForm
-from rango.forms import UserForm, UserProfileForm, SocietyForm
+from rango.forms import UserForm, UserProfileForm, SocietyForm, CategoryForm
 from .models import UserProfile, Society, Category
 
 
@@ -357,3 +357,64 @@ def delete_society(request, pk):
 def society_detail(request, pk):
     society = get_object_or_404(Society, pk=pk)
     return render(request, 'rango/society_detail.html', {'society': society})
+
+@login_required
+def category_list(request):
+    categories = Category.objects.all().order_by('name')
+    return render(request, 'rango/category_list.html', {'categories': categories})
+
+@login_required
+def category_detail(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+    societies = Society.objects.filter(categories=category)
+
+    context = {
+        'category': category,
+        'societies': societies
+    }
+
+    return render(request, 'rango/category_detail.html', context)
+
+@login_required
+def create_category(request):
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category created successfully!')
+            return redirect('rango:category_list')
+
+    else:
+        form = CategoryForm()
+
+    return render(request, 'rango/create_category.html', {'form': form})
+
+@login_required
+def edit_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, instance=category)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category updated successfully!')
+            return redirect('rango:category_list')
+
+    else:
+        form = CategoryForm(instance=category)
+
+    return render(request, 'rango/edit_category.html', {'form': form, 'category': category})
+
+@login_required
+def delete_category(request, pk):
+    category = get_object_or_404(Category, pk=pk)
+
+    if request.method == 'POST':
+        category.delete()
+        messages.success(request, 'Category deleted successfully!')
+        return redirect('rango:category_list')
+
+    return render(request, 'rango/delete_category.html', {'category': category})
+
