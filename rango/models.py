@@ -93,7 +93,6 @@ def save_user_profile(sender, instance, **kwargs):
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     society = models.ForeignKey(Society, on_delete=models.CASCADE)
-    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -104,13 +103,25 @@ class Review(models.Model):
         return f"{self.user.username} review of {self.society.name}"
 
 
+class Rating(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    society = models.ForeignKey(Society, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    star = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+
+    class Meta:
+        unique_together = ('user', 'society')  # one rating per user per society
+
+    def __str__(self):
+        return f"{self.user.username} rates {self.society.name} {self.star}"
+
 class Upvote(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     review = models.ForeignKey(Review, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'review')  # one upvote per user per review
+        unique_together = ('user', 'review')  # one upvote per user per society
 
     def __str__(self):
-        return f"{self.user.username} upvoted review {self.review.id}"
+        return f"{self.user.username} upvotes review on {self.review.society.name}"
