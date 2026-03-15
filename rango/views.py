@@ -16,8 +16,8 @@ import os
 #from rango.models import Page
 #from rango.forms import CategoryForm
 #from rango.forms import PageForm
-from rango.forms import UserForm, UserProfileForm, SocietyForm, CategoryForm
-from .models import UserProfile, Society, Category, Rating
+from rango.forms import UserForm, UserProfileForm, SocietyForm, CategoryForm, ReviewForm
+from .models import UserProfile, Society, Category, Rating, Review, Upvote
 
 
 def index(request):
@@ -421,24 +421,53 @@ def delete_category(request, pk):
 
     return render(request, 'rango/delete_category.html', {'category': category})
 
+# @login_required
+# def society_detail(request, pk):
+#     society = get_object_or_404(Society, pk=pk)
+#     avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
+#     user_rating = None
+#     if request.user.is_authenticated:
+#         try:
+#             user_rating = Rating.objects.get(user=request.user, society=society)
+#         except Rating.DoesNotExist:
+#             user_rating = None
+#     range_5 = range(1, 6)
+#
+#     context = {
+#         'society': society,
+#         'avg_rating': avg_rating,
+#         'user_rating': user_rating,
+#         'range_5': range_5,
+#     }
+#     return render(request, 'rango/society_detail.html', context)
+
 @login_required
 def society_detail(request, pk):
     society = get_object_or_404(Society, pk=pk)
+
     avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
+
     user_rating = None
-    if request.user.is_authenticated:
-        try:
-            user_rating = Rating.objects.get(user=request.user, society=society)
-        except Rating.DoesNotExist:
-            user_rating = None
-    range_5 = range(1, 6)
+    try:
+        user_rating = Rating.objects.get(user=request.user, society=society)
+    except Rating.DoesNotExist:
+        pass
+
+    reviews = Review.objects.filter(society=society).order_by('-created_at')
+
+    review_form = ReviewForm()
+
+    range_5 = range(1,6)
 
     context = {
         'society': society,
         'avg_rating': avg_rating,
         'user_rating': user_rating,
+        'reviews': reviews,
+        'review_form': review_form,
         'range_5': range_5,
     }
+
     return render(request, 'rango/society_detail.html', context)
 
 
@@ -461,3 +490,33 @@ def rate_society(request, pk):
         return redirect('rango:society_detail', pk=society.pk)
 
     return redirect('rango:society_detail', pk=society.pk)
+
+@login_required
+def add_review(request, pk):
+    society = get_object_or_404(Society, pk=pk)
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.user = request.user
+            review.society = society
+            review.save()
+
+    return redirect('rango:society_detail', pk=pk)
+
+@login_required
+def upvote_review(request, review_id):
+
+    review = get_object_or_404(Review, id=review_id)
+
+    upvote, created = Upvote.objects.get_or_create(
+        user=request.user,
+        review=review
+    )
+
+    if not created:
+        upvote.delete()  # toggle like
+
+    return redirect('rango:society_detail', pk=review.society.pk)

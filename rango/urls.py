@@ -24,6 +24,8 @@ urlpatterns = [
     path('societies/<int:pk>/delete/', views.delete_society, name='delete_society'),
     path('societies/<int:pk>/', views.society_detail, name='society_detail'),
     path('societies/<int:pk>/rate/', views.rate_society, name='rate_society'),
+    path('societies/<int:pk>/review/', views.add_review, name='add_review'),
+    path('reviews/<int:review_id>/upvote/', views.upvote_review, name='upvote_review'),
 
     #Category CRUD
     path('categories/', views.category_list, name='category_list'),
