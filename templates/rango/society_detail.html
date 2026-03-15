@@ -1,6 +1,8 @@
-<!-- templates/rango/society_detail.html -->
 {% extends 'rango/base.html' %}
-{% block title_block %}{{ society.name }}{% endblock %}
+
+{% block title_block %}
+    {{ society.name }}
+{% endblock %}
 
 {% block body_block %}
 <h1>{{ society.name }}</h1>
@@ -10,12 +12,81 @@
 {% endif %}
 
 <p><strong>Created by:</strong> {{ society.created_by.username }}</p>
+
 <p><strong>Categories:</strong>
-    {% for cat in society.categories.all %}
-        {{ cat.name }}{% if not forloop.last %}, {% endif %}
-    {% endfor %}
+{% for cat in society.categories.all %}
+    {{ cat.name }}{% if not forloop.last %}, {% endif %}
+{% endfor %}
 </p>
+
 <p><strong>Description:</strong> {{ society.description }}</p>
 
-<a href="{% url 'rango:society_list' %}">Back to societies list</a>
+<hr>
+
+<h3>Average Rating</h3>
+{% if avg_rating %}
+    <p>
+        {% for i in range_5 %}
+            <i class="fa {% if i <= avg_rating|floatformat:0 %}fa-star{% else %}fa-star-o{% endif %}"></i>
+        {% endfor %}
+        ({{ avg_rating|floatformat:1 }} / 5)
+    </p>
+{% else %}
+    <p>No ratings yet</p>
+{% endif %}
+
+<hr>
+
+<h3>Your Rating</h3>
+{% if user.is_authenticated %}
+<form method="post" action="{% url 'rango:rate_society' society.pk %}">
+    {% csrf_token %}
+{#    <div class="rating-options">#}
+{#        {% for i in range_5 %}#}
+{#            <label>#}
+{#                <input type="radio" name="star" value="{{ i }}"#}
+{#                       {% if user_rating and user_rating.star == i %}checked{% endif %}>#}
+{#                {% for j in range_5|slice:":i" %}⭐{% endfor %}#}
+{#            </label>#}
+{#        {% endfor %}#}
+{#    </div>#}
+    <div class="rating-options">
+        <label>
+            <input type="radio" name="star" value="1" {% if user_rating and user_rating.star == 1 %}checked{% endif %}>
+            ⭐
+        </label>
+        <label>
+            <input type="radio" name="star" value="2" {% if user_rating and user_rating.star == 2 %}checked{% endif %}>
+            ⭐⭐
+        </label>
+        <label>
+            <input type="radio" name="star" value="3" {% if user_rating and user_rating.star == 3 %}checked{% endif %}>
+            ⭐⭐⭐
+        </label>
+        <label>
+            <input type="radio" name="star" value="4" {% if user_rating and user_rating.star == 4 %}checked{% endif %}>
+            ⭐⭐⭐⭐
+        </label>
+        <label>
+            <input type="radio" name="star" value="5" {% if user_rating and user_rating.star == 5 %}checked{% endif %}>
+            ⭐⭐⭐⭐⭐
+        </label>
+    </div>
+    <br>
+    <button type="submit" class="btn btn-primary">Submit Rating</button>
+</form>
+{% else %}
+<p>You must <a href="{% url 'login' %}">login</a> to rate this society.</p>
+{% endif %}
+
+{% if user_rating %}
+<p>Your current rating:
+    {% for i in range_5 %}
+        <i class="fa {% if i <= user_rating.star %}fa-star{% else %}fa-star-o{% endif %}"></i>
+    {% endfor %}
+</p>
+{% endif %}
+
+<br>
+<a href="{% url 'rango:society_list' %}" class="btn btn-secondary">Back to societies list</a>
 {% endblock %}

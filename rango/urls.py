@@ -23,6 +23,7 @@ urlpatterns = [
     path('societies/<int:pk>/edit/', views.edit_society, name='edit_society'),
     path('societies/<int:pk>/delete/', views.delete_society, name='delete_society'),
     path('societies/<int:pk>/', views.society_detail, name='society_detail'),
+    path('societies/<int:pk>/rate/', views.rate_society, name='rate_society'),
 
     #Category CRUD
     path('categories/', views.category_list, name='category_list'),
