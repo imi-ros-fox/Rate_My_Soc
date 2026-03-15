@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from rango.models import UserProfile, Society
+from rango.models import UserProfile, Society, Rating
 from rango.models import Category
 
 
@@ -57,3 +57,17 @@ class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
         fields = ['name']
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['star']
+        widgets = {
+            'star': forms.Select(choices=[(i, '⭐' * i) for i in range(1, 6)])
+        }
+
+    def clean_star(self):
+        star = self.cleaned_data.get('star')
+        if not star:
+            raise forms.ValidationError("Please select a rating.")
+        return star

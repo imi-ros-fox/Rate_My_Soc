@@ -2,6 +2,7 @@ from datetime import datetime
 from urllib import response
 
 from django.contrib.auth.models import User
+from django.db.models import Avg
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import context
@@ -16,7 +17,7 @@ import os
 #from rango.forms import CategoryForm
 #from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm, SocietyForm, CategoryForm
-from .models import UserProfile, Society, Category
+from .models import UserProfile, Society, Category, Rating
 
 
 def index(request):
@@ -309,6 +310,11 @@ def society_list(request):
 
 @login_required
 def create_society(request):
+
+    if request.user.userprofile.role != 'PRESIDENT':
+        messages.error(request, 'Only Society Presidents can create societies.')
+        return redirect('rango:society_list')
+
     if request.method == 'POST':
         form = SocietyForm(request.POST, request.FILES)
         if form.is_valid():
@@ -325,7 +331,8 @@ def create_society(request):
 @login_required
 def edit_society(request, pk):
     society = get_object_or_404(Society, pk=pk)
-    if request.user != society.created_by:
+
+    if request.user != society.created_by or request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'You are not allowed to edit this society.')
         return redirect('rango:society_list')
 
@@ -342,7 +349,8 @@ def edit_society(request, pk):
 @login_required
 def delete_society(request, pk):
     society = get_object_or_404(Society, pk=pk)
-    if request.user != society.created_by:
+
+    if request.user != society.created_by or request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'You are not allowed to delete this society.')
         return redirect('rango:society_list')
 
@@ -352,11 +360,6 @@ def delete_society(request, pk):
         return redirect('rango:society_list')
 
     return render(request, 'rango/delete_society.html', {'society': society})
-
-@login_required
-def society_detail(request, pk):
-    society = get_object_or_404(Society, pk=pk)
-    return render(request, 'rango/society_detail.html', {'society': society})
 
 @login_required
 def category_list(request):
@@ -418,3 +421,43 @@ def delete_category(request, pk):
 
     return render(request, 'rango/delete_category.html', {'category': category})
 
+@login_required
+def society_detail(request, pk):
+    society = get_object_or_404(Society, pk=pk)
+    avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
+    user_rating = None
+    if request.user.is_authenticated:
+        try:
+            user_rating = Rating.objects.get(user=request.user, society=society)
+        except Rating.DoesNotExist:
+            user_rating = None
+    range_5 = range(1, 6)
+
+    context = {
+        'society': society,
+        'avg_rating': avg_rating,
+        'user_rating': user_rating,
+        'range_5': range_5,
+    }
+    return render(request, 'rango/society_detail.html', context)
+
+
+@login_required
+def rate_society(request, pk):
+    society = get_object_or_404(Society, pk=pk)
+
+    if request.method == 'POST':
+        star = request.POST.get('star')
+        if star:
+            star = int(star)
+            rating, created = Rating.objects.get_or_create(
+                user=request.user,
+                society=society,
+                defaults={'star': star}
+            )
+            if not created:
+                rating.star = star
+                rating.save()
+        return redirect('rango:society_detail', pk=society.pk)
+
+    return redirect('rango:society_detail', pk=society.pk)
