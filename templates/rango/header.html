@@ -11,9 +11,9 @@
     </a>
 
     <div class="site-search-total">
-        <form class="site-search" method="get" action="{% url 'rango:about' %}"><!--this can be changed base on how search happens-->
+        <form class="site-search"  method="get" action="{% url 'rango:search_societies' %}">
             <div class="site-search-group">
-                <input type="text" name="text" placeholder="Search societies">
+                <input type="text" name="q" placeholder="Search societies..." required>
                 <button type="submit">Search</button>
             </div>
         </form>

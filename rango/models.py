@@ -4,16 +4,6 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
-# class Profile(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     bio = models.TextField(blank=True)  # optional?
-#     picture = models.ImageField(upload_to='profile_images', blank=True)
-#     role = models.CharField(max_length=50, default='student')
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return self.user.username
 class UserProfile(models.Model):
     ROLE_CHOICES = (
         ('STUDENT', 'Student'),
