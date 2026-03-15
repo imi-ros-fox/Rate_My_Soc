@@ -1,0 +1,23 @@
+{% extends 'rango/base.html' %}
+{% block title_block %}
+Search Results
+{% endblock %}
+{% block body_block %}
+<h2>Search Results</h2>
+{% if query %}
+<p>Results for "<strong>{{ query }}</strong>"</p>
+{% endif %}
+{% if results %}
+<ul>
+{% for society in results %}
+<li>
+<a href="{% url 'rango:society_detail' society.pk %}">
+    {{ society.name }}
+</a>
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p>No societies found.</p>
+{% endif %}
+{% endblock %}

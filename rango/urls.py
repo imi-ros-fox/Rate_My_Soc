@@ -6,11 +6,6 @@ app_name = 'rango'
 urlpatterns = [ 
     path('', views.index, name='index'),
     path('about/', views.about, name='about'),
- #   path('category/<slug:category_name_slug>/',
- #         views.show_category, name='show_category'),
- #   path('add_category/' , views.add_category, name='add_category'),
- #   path('category/<slug:category_name_slug>/add_page/',
- #         views.add_page, name='add_page'),
     path('register/', views.register, name='register'),
     path('login/', views.user_login, name='login'),
     path('restricted/', views.restricted, name='restricted'),
@@ -26,6 +21,8 @@ urlpatterns = [
     path('societies/<int:pk>/rate/', views.rate_society, name='rate_society'),
     path('societies/<int:pk>/review/', views.add_review, name='add_review'),
     path('reviews/<int:review_id>/upvote/', views.upvote_review, name='upvote_review'),
+    path('search/', views.search_societies, name='search_societies'),
+    path('societies/top/', views.top_rated_societies, name='top_societies'),
 
     #Category CRUD
     path('categories/', views.category_list, name='category_list'),

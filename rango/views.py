@@ -2,7 +2,7 @@ from datetime import datetime
 from urllib import response
 
 from django.contrib.auth.models import User
-from django.db.models import Avg
+from django.db.models import Avg, Q, Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import context
@@ -11,79 +11,33 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import os
-
-#from rango.models import Category
-#from rango.models import Page
-#from rango.forms import CategoryForm
-#from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm, SocietyForm, CategoryForm, ReviewForm
 from .models import UserProfile, Society, Category, Rating, Review, Upvote
 
 
 def index(request):
-   # category_list = Category.objects.order_by('-likes')[:5]
-   # page_list = Page.objects.order_by('-views')[:5]
     context_dict = {}
-    context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
-   # context_dict['categories'] = category_list
-   # context_dict['pages'] = page_list
     visitor_cookie_handler(request)
     response = render(request, 'rango/index.html', context=context_dict)
     return response
 
 def about(request):
-    if request.session.test_cookie_worked():
-        print("TEST COOKIE WORKED!")
-        request.session.delete_test_cookie()
     visitor_cookie_handler(request)
-    context_dict = {'visits': request.session['visits']}
+    total_users = User.objects.count()
+    total_societies = Society.objects.count()
+    # Top 3
+    top_societies = Society.objects.annotate(
+        avg_rating=Avg('rating__star')
+    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:3]
+
+    context_dict = {
+        'visits': request.session['visits'],
+        'total_users': total_users,
+        'total_societies': total_societies,
+        'top_societies': top_societies,
+    }
+
     return render(request, 'rango/about.html', context=context_dict)
-
-# def show_category(request, category_name_slug):
-#     context_dict = {}
-#     try:
-#         category = Category.objects.get(slug=category_name_slug)
-#         pages = Page.objects.filter(category=category)
-#         context_dict['pages'] = pages
-#         context_dict['category'] = category
-#     except Category.DoesNotExist:
-#         context_dict['category'] = None
-#         context_dict['pages'] = None
-#     return render(request, 'rango/category.html', context=context_dict)
-
-# def add_category(request):
-#     form = CategoryForm()
-#     if request.method == 'POST':
-#         form = CategoryForm(request.POST)
-#         if form.is_valid():
-#             form.save(commit=True)
-#             return redirect('/rango/')
-#         else:
-#             print(form.errors)
-#     return render(request, 'rango/add_category.html', {'form': form})
-
-# def add_page(request, category_name_slug):
-#     try:
-#         category = Category.objects.get(slug=category_name_slug)
-#     except Category.DoesNotExist:
-#         category = None
-#     if category is None:
-#         return redirect('/rango/')
-#     form = PageForm()
-#     if request.method =='POST':
-#         form = PageForm(request.POST)
-#         if form.is_valid():
-#             page = form.save(commit=False)
-#             page.category = category
-#             page.views = 0
-#             page.save()
-#             return redirect(reverse('rango:show_category',
-#                                      kwargs={'category_name_slug':
-#                                               category_name_slug}))
-#         else:
-#             print(form.errors)
-#     context_dict = {'form': form, 'category': category}
-#     return render(request, 'rango/add_page.html', context=context_dict)
 
 def register(request):
     registered = False
@@ -277,6 +231,10 @@ def visitor_cookie_handler(request):
 
 @login_required
 def create_soc(request):
+    if request.user.userprofile.role != 'PRESIDENT':
+        messages.error(request, 'Only Society Presidents can create societies.')
+        return redirect('rango:society_list')
+
     categories = Category.objects.all()
 
     if request.method == 'POST':
@@ -370,12 +328,10 @@ def category_list(request):
 def category_detail(request, pk):
     category = get_object_or_404(Category, pk=pk)
     societies = Society.objects.filter(categories=category)
-
     context = {
         'category': category,
         'societies': societies
     }
-
     return render(request, 'rango/category_detail.html', context)
 
 @login_required
@@ -413,48 +369,24 @@ def edit_category(request, pk):
 @login_required
 def delete_category(request, pk):
     category = get_object_or_404(Category, pk=pk)
-
     if request.method == 'POST':
         category.delete()
         messages.success(request, 'Category deleted successfully!')
         return redirect('rango:category_list')
-
     return render(request, 'rango/delete_category.html', {'category': category})
-
-# @login_required
-# def society_detail(request, pk):
-#     society = get_object_or_404(Society, pk=pk)
-#     avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
-#     user_rating = None
-#     if request.user.is_authenticated:
-#         try:
-#             user_rating = Rating.objects.get(user=request.user, society=society)
-#         except Rating.DoesNotExist:
-#             user_rating = None
-#     range_5 = range(1, 6)
-#
-#     context = {
-#         'society': society,
-#         'avg_rating': avg_rating,
-#         'user_rating': user_rating,
-#         'range_5': range_5,
-#     }
-#     return render(request, 'rango/society_detail.html', context)
 
 @login_required
 def society_detail(request, pk):
     society = get_object_or_404(Society, pk=pk)
-
     avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
-
     user_rating = None
     try:
         user_rating = Rating.objects.get(user=request.user, society=society)
     except Rating.DoesNotExist:
         pass
-
-    reviews = Review.objects.filter(society=society).order_by('-created_at')
-
+    reviews = Review.objects.filter(society=society).annotate(
+        upvote_count=Count('upvote')
+    ).order_by('-upvote_count', '-created_at')
     review_form = ReviewForm()
 
     range_5 = range(1,6)
@@ -467,7 +399,6 @@ def society_detail(request, pk):
         'review_form': review_form,
         'range_5': range_5,
     }
-
     return render(request, 'rango/society_detail.html', context)
 
 
@@ -488,35 +419,57 @@ def rate_society(request, pk):
                 rating.star = star
                 rating.save()
         return redirect('rango:society_detail', pk=society.pk)
-
     return redirect('rango:society_detail', pk=society.pk)
 
 @login_required
 def add_review(request, pk):
     society = get_object_or_404(Society, pk=pk)
-
     if request.method == 'POST':
+        if Review.objects.filter(user=request.user, society=society).exists():
+            messages.error(request, "You have already written a review for this society.")
+            return redirect('rango:society_detail', pk=pk)
         form = ReviewForm(request.POST)
-
         if form.is_valid():
             review = form.save(commit=False)
             review.user = request.user
             review.society = society
             review.save()
-
     return redirect('rango:society_detail', pk=pk)
 
 @login_required
 def upvote_review(request, review_id):
-
     review = get_object_or_404(Review, id=review_id)
-
     upvote, created = Upvote.objects.get_or_create(
         user=request.user,
         review=review
     )
-
     if not created:
         upvote.delete()  # toggle like
-
     return redirect('rango:society_detail', pk=review.society.pk)
+
+def search_societies(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        results = Society.objects.filter(
+            Q(name__icontains=query) |
+            Q(description__icontains=query)
+        ).distinct()
+    context = {
+        'query': query,
+        'results': results
+    }
+    return render(request, 'rango/search_results.html', context)
+
+def top_rated_societies(request):
+    N = 5
+    societies = Society.objects.annotate(
+        avg_rating=Avg('rating__star')
+    ).filter(
+        avg_rating__isnull=False
+    ).order_by('-avg_rating')[:N]
+    context = {
+        'societies': societies,
+        'N': N
+    }
+    return render(request, 'rango/top_societies.html', context)

@@ -41,15 +41,6 @@
 {% if user.is_authenticated %}
 <form method="post" action="{% url 'rango:rate_society' society.pk %}">
     {% csrf_token %}
-{#    <div class="rating-options">#}
-{#        {% for i in range_5 %}#}
-{#            <label>#}
-{#                <input type="radio" name="star" value="{{ i }}"#}
-{#                       {% if user_rating and user_rating.star == i %}checked{% endif %}>#}
-{#                {% for j in range_5|slice:":i" %}⭐{% endfor %}#}
-{#            </label>#}
-{#        {% endfor %}#}
-{#    </div>#}
     <div class="rating-options">
         <label>
             <input type="radio" name="star" value="1" {% if user_rating and user_rating.star == 1 %}checked{% endif %}>
@@ -90,14 +81,16 @@
 <hr>
 
 <h3>Write a Review</h3>
-
+    {% if user_review %}
+    <p>You already wrote a review for this society.</p>
+    {% else %}
     <form method="post" action="{% url 'rango:add_review' society.pk %}">
         {% csrf_token %}
         {{ review_form.comment }}
         <br>
         <button type="submit" class="btn btn-primary">Post Review</button>
     </form>
-
+    {% endif %}
     <hr>
 
 <h3>Reviews</h3>
@@ -111,7 +104,8 @@
         <form method="post" action="{% url 'rango:upvote_review' review.id %}">
             {% csrf_token %}
             <button type="submit">
-                👍 {{ review.upvote_set.count }}
+                #👍 {{ review.upvote_set.count }}
+                👍 {{ review.upvote_count }}
             </button>
         </form>
     </div>
