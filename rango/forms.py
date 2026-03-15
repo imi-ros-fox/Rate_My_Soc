@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from rango.models import UserProfile, Society, Rating
+from rango.models import UserProfile, Society, Rating, Review
 from rango.models import Category
 
 
@@ -71,3 +71,11 @@ class RatingForm(forms.ModelForm):
         if not star:
             raise forms.ValidationError("Please select a rating.")
         return star
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['comment']
+        widgets = {
+            'comment': forms.Textarea(attrs={'rows':3, 'placeholder':'Write your review...'})
+        }
