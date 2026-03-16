@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Q, Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template import context
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -16,8 +15,29 @@ from .models import UserProfile, Society, Category, Rating, Review, Upvote
 
 
 def index(request):
-    context_dict = {}
+
     visitor_cookie_handler(request)
+    category_filter = request.GET.get('cat')
+    societies = Society.objects.all().order_by('name')
+
+    if category_filter:
+        societies = societies.filter(categories__name__iexact=category_filter)
+
+    top_societies = Society.objects.annotate(
+        avg_rating=Avg('rating__star')
+    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:8]
+
+    categories = Category.objects.all()
+
+    context_dict = {
+        'societies': societies,
+        'top_societies': top_societies,
+        'categories': categories,
+    }
+
+    response = render(request, 'rango/index.html', context=context_dict)
+    return response
+
     response = render(request, 'rango/index.html', context=context_dict)
     return response
 
@@ -47,48 +67,54 @@ def register(request):
         profile_form = UserProfileForm(request.POST, request.FILES)
 
         if user_form.is_valid() and profile_form.is_valid():
-            #Password strength checker
+
             password = user_form.cleaned_data.get('password')
             if len(password) < 8:
                 messages.error(request, 'Password must be at least 8 characters long')
-                #Need to solve this error
-                return render(request, 'rango/register.html', context)
+                return render(request, 'rango/register.html', {
+                    'user_form': user_form,
+                    'profile_form': profile_form,
+                    'registered': registered
+                    #upd
+                })
 
             user = user_form.save()
             user.set_password(user.password)
             user.save()
 
-            profile = profile_form.save(commit=False)
-            profile.user = user
+            profile = user.userprofile
 
             if 'picture' in request.FILES:
                 profile.picture = request.FILES['picture']
 
             profile.role = profile_form.cleaned_data.get('role', 'STUDENT')
+            profile.bio = profile_form.cleaned_data.get('bio', '')
             profile.save()
 
-            login(request, user) #Auto-login the user
+            login(request, user)
             registered = True
 
-            #Different login messages based on role
             if profile.role == 'PRESIDENT':
-                messages.success(request, 'Welcome to Rate My Society! You can now create and manage societies.')
+                messages.success(request,
+                    'Welcome to Rate My Society! You can now create and manage societies.')
             else:
-                messages.success(request, 'Welcome to Rate My Society! You can now start exploring and reviewing societies.')
-            
-            #After the user has successfully registered, they are sent to the homepage
-            return redirect(reverse('rango:index')) 
+                messages.success(request,
+                    'Welcome to Rate My Society! You can now explore and review societies.')
+
+            return redirect(reverse('rango:index'))
+
         else:
             print(user_form.errors, profile_form.errors)
+
     else:
         user_form = UserForm()
         profile_form = UserProfileForm()
-            
-    return render(request,
-                  'rango/register.html',
-                  context={'user_form': user_form,
-                            'profile_form': profile_form,
-                            'registered': registered})
+
+    return render(request, 'rango/register.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'registered': registered
+    })
 
 def user_login(request):
     if request.method == 'POST':
