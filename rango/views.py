@@ -54,6 +54,7 @@ def register(request):
                     'user_form': user_form,
                     'profile_form': profile_form,
                     'registered': registered
+                    #upd
                 })
 
             user = user_form.save()
