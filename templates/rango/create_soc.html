@@ -9,30 +9,63 @@
     <h1>Create a Society</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <label for="name">Society Name:</label>
-        <input type="text" id="name" name="name" required>
+        {% if form and form.non_field_errors %}
+            <div class="form-errors">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <label for="{% if form %}{{ form.name.id_for_label }}{% else %}name{% endif %}">Society Name:</label>
+        <input
+            type="text"
+            id="{% if form %}{{ form.name.id_for_label }}{% else %}name{% endif %}"
+            name="name"
+            value="{% if form %}{{ form.name.value|default_if_none:'' }}{% endif %}"
+            required
+        >
+        {% if form and form.name.errors %}
+            <div class="field-errors">{{ form.name.errors }}</div>
+        {% endif %}
 
         <label>Tags:</label>
         <div class="tag-bubbles" id="tags">
-            {% for category in categories %}
-                <label class="tag-bubble">
-                    <input type="checkbox" name="tags[]" value="{{ category.id }}">
-                    <span>{{ category.name }}</span>
-                </label>
-            {% endfor %}
+            {% if form %}
+                {% for choice in form.categories %}
+                    <label class="tag-bubble">
+                        {{ choice.tag }}
+                        <span>{{ choice.choice_label }}</span>
+                    </label>
+                {% endfor %}
+            {% else %}
+                {% for category in categories %}
+                    <label class="tag-bubble">
+                        <input type="checkbox" name="tags[]" value="{{ category.id }}">
+                        <span>{{ category.name }}</span>
+                    </label>
+                {% endfor %}
+            {% endif %}
         </div>
+        {% if form and form.categories.errors %}
+            <div class="field-errors">{{ form.categories.errors }}</div>
+        {% endif %}
 
-        <label for="image">Add Society Logo</label>
+        <label for="{% if form %}{{ form.image.id_for_label }}{% else %}image{% endif %}">Add Society Logo</label>
         <div class="logo-upload-bar">
-            <input type="file" id="image" name="image" accept="image/*">
+            <input type="file" id="{% if form %}{{ form.image.id_for_label }}{% else %}image{% endif %}" name="image" accept="image/*">
             <div class="logo-bar-inner">
                 <span class="logo-file-name" id="logo-file-name">Choose a logo file</span>
-                <label class="logo-upload-button" for="image">Browse</label>
+                <label class="logo-upload-button" for="{% if form %}{{ form.image.id_for_label }}{% else %}image{% endif %}">Browse</label>
             </div>
         </div>
+        {% if form and form.image.errors %}
+            <div class="field-errors">{{ form.image.errors }}</div>
+        {% endif %}
 
-        <label for="description">Description:</label>
-        <textarea id="description" name="description" rows="4" required></textarea>
+        <label for="{% if form %}{{ form.description.id_for_label }}{% else %}description{% endif %}">Description:</label>
+        <textarea id="{% if form %}{{ form.description.id_for_label }}{% else %}description{% endif %}" name="description" rows="4" required>{% if form %}{{ form.description.value|default_if_none:'' }}{% endif %}</textarea>
+        {% if form and form.description.errors %}
+            <div class="field-errors">{{ form.description.errors }}</div>
+        {% endif %}
 
         <button type="submit">Create Society</button>
     </form>
@@ -53,6 +86,17 @@
         display: block;
         margin-top: 1rem;
         font-weight: bold;
+    }
+    .form-errors,
+    .field-errors {
+        margin-top: 0.5rem;
+        color: #8b1e1e;
+        font-weight: 600;
+    }
+    .form-errors ul,
+    .field-errors ul {
+        margin: 0;
+        padding-left: 1.2rem;
     }
     .create-society-container input[type="text"],
     .create-society-container textarea {

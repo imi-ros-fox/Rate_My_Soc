@@ -23,15 +23,10 @@
 
 .auth-card form {
     display: grid;
+    gap: 1rem;
 }
 
-.auth-card p label {
-    display: block;
-    margin-bottom: 0.35rem;
-    font-weight: 600;
-}
-
-.auth-card input,
+.auth-card input:not([type="file"]),
 .auth-card textarea,
 .auth-card select {
     width: 100%;
@@ -40,6 +35,94 @@
     border-radius: 8px;
     background: #add9ff;
     box-sizing: border-box;
+}
+
+.form-field {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.form-field label,
+.field-label {
+    font-weight: 600;
+}
+
+.role-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.role-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 8px;
+    background: #add9ff;
+}
+
+.role-option input {
+    width: auto;
+    margin: 0;
+}
+
+.upload-choice-row {
+    width: 100%;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    border: 0;
+    background: #add9ff;
+    display: flex;
+    align-items: center;
+    position: relative;
+    box-sizing: border-box;
+}
+
+.upload-choice-row input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    z-index: -1;
+    pointer-events: auto;
+}
+
+.upload-bar-inner {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    width: 100%;
+    padding: 0 0.5rem;
+    flex-direction: row-reverse; 
+}
+
+.upload-file-name {
+    flex: 1;
+    min-width: 0;
+    padding: 0 0.5rem;
+    color: #1f2a37;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
+}
+
+.upload-choice-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: #0f2a3d;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+.field-errors ul {
+    margin: 0;
+    padding-left: 1.2rem;
 }
 
 

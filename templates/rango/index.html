@@ -1,31 +1,66 @@
-<!DOCTYPE html>
 {% extends 'rango/base.html' %}
 {% load staticfiles %}
-{% block title_block %} 
-    Rate My Soc - Home 
-{% endblock %}
 
+{% block title_block %}Societies{% endblock %}
 
 {% block body_block %}
-    <h1>Rate My Society says...</h1>
-    <div>
-        {% if user.is_authenticated %}
-             howdy {{ user.username }}!
-        {% else %}
-        Rate My Society says hey there partner!
-        {% endif %}
-    </div>
-    <div>
-        <a href="{% url 'rango:about' %}">About</a><br />
-    </div>
-    <div>
-        <a href="{% url 'rango:society_list' %}">Societies</a><br />
-    </div>
-    <div>
-        <a href="{% url 'rango:category_list' %}">Categories</a><br />
-    </div>
-    <div>
-        <a href="{% url 'rango:top_societies' %}">Top Societies</a>
-    </div>
+<link rel="stylesheet" type="text/css" href="{% static 'css/home_page.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
+<div class="soc-page">
+    <aside class="soc-sidebar">
+        <h2 class="soc-sidebar-title">Most Liked</h2>
+        <ul class="soc-sidebar-list">
+            {% for society in top_societies %}
+            <li class="soc-sidebar-item">
+                <a href="{% url 'rango:society_detail' society.pk %}" class="soc-sidebar-link">
+                    <div class="soc-sidebar-avatar">
+                        {% if society.logo %}
+                            <img src="{{ society.logo.url }}" alt="{{ society.name }}">
+                        {% endif %}
+                    </div>
+                    <span class="soc-sidebar-name">{{ society.name }}</span>
+                    <span class="soc-sidebar-stars" style="--rating: {{ society.average_rating|default:'0' }};"></span>
+                </a>
+            </li>
+            {% empty %}
+            <li class="soc-sidebar-empty">No societies yet.</li>
+            {% endfor %}
+        </ul>
+    </aside>
+    <main class="soc-main">
+        <div class="soc-main-header">
+            <h2 class="soc-main-title">Societies A–Z</h2>
+            <div class="soc-sort">
+                <details class="soc-sort-dropdown">
+                    <summary class="soc-sort-btn">Sort by</summary>
+                    <div class="soc-sort-panel">
+                        <p class="soc-sort-section-label">Categories</p>
+                        <ul class="soc-sort-list">
+                            {% for category in categories %}
+                            <li><a href="?cat={{ category.name }}">{{ category.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </details>
+            </div>
+        </div>
+        <div class="soc-grid">
+            {% for society in societies %}
+            <a href="{% url 'rango:society_detail' society.pk %}" class="soc-card">
+                <div class="soc-card-logo">
+                    {% if society.logo %}
+                        <img src="{{ society.logo.url }}" alt="{{ society.name }}">
+                    {% endif %}
+                </div>
+                <span class="soc-card-name">{{ society.name }}</span>
+                <span class="soc-card-stars" style="--rating: {{ society.average_rating|default:'0' }};"></span>
+            </a>
+            {% empty %}
+            <p class="soc-grid-empty">No societies yet.</p>
+            {% endfor %}
+        </div>
+    </main>
+
+</div>
 {% endblock %}
