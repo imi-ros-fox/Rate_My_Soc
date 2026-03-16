@@ -14,7 +14,7 @@ urlpatterns = [
 
     #society CRUD
     path('societies/', views.society_list, name='society_list'),
-    path('societies/create/', views.create_society, name='create_society'),
+    path('societies/create/', views.create_society, name='create_soc'),
     path('societies/<int:pk>/edit/', views.edit_society, name='edit_society'),
     path('societies/<int:pk>/delete/', views.delete_society, name='delete_society'),
     path('societies/<int:pk>/', views.society_detail, name='society_detail'),
