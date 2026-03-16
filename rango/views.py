@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Q, Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template import context
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -49,10 +48,11 @@ def register(request):
         if user_form.is_valid() and profile_form.is_valid():
             #Password strength checker
             password = user_form.cleaned_data.get('password')
-            if len(password) < 8:
-                messages.error(request, 'Password must be at least 8 characters long')
-                #Need to solve this error
-                return render(request, 'rango/register.html', context)
+            return render(request, 'rango/register.html', {
+                'user_form': user_form,
+                'profile_form': profile_form,
+                'registered': registered
+            })
 
             user = user_form.save()
             user.set_password(user.password)
