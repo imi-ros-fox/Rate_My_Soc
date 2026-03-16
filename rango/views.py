@@ -15,8 +15,26 @@ from .models import UserProfile, Society, Category, Rating, Review, Upvote
 
 
 def index(request):
-    context_dict = {}
+
     visitor_cookie_handler(request)
+    category_filter = request.GET.get('cat')
+    societies = Society.objects.all().order_by('name')
+
+    if category_filter:
+        societies = societies.filter(categories__name__iexact=category_filter)
+
+    top_societies = Society.objects.annotate(
+        avg_rating=Avg('rating__star')
+    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:8]
+
+    categories = Category.objects.all()
+
+    context_dict = {
+        'societies': societies,
+        'top_societies': top_societies,
+        'categories': categories,
+    }
+
     response = render(request, 'rango/index.html', context=context_dict)
     return response
 
