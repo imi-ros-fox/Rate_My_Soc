@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.db.models import Avg, Q, Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template import context
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required

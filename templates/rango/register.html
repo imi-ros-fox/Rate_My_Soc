@@ -6,69 +6,122 @@
 {% endblock %}
 
 {% block body_block %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/Sign_up.css' %}">
-        <div class="page auth-page">
-            <div class="auth-card">
-                <h1>Register</h1>
-                {% if registered %}
-                    <p>Thank you for registering.</p>
-                    <a class="return-link" href="{% url 'rango:index' %}">Return to the homepage</a>
-                {% else %}
-                    <form id="user_form" method="post" action="{% url 'rango:register' %}" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="form-field">
-                            <label for="{{ user_form.username.id_for_label }}">Username</label>
-                            {{ user_form.username }}
-                        </div>
-                        <div class="form-field">
-                            <label for="{{ user_form.email.id_for_label }}">Email</label>
-                            {{ user_form.email }}
-                        </div>
-                        <div class="form-field">
-                            <label for="{{ user_form.password.id_for_label }}">Password</label>
-                            {{ user_form.password }}
-                        </div>
-                        <div class="form-field">
-                            <label for="confirm_password">Confirm password</label>
-                            <input id="confirm_password" type="password" autocomplete="new-password" required>
-                        </div>
-                        <div class="form-field">
-                            <label for="id_picture">Profile picture</label>
-                            <div class="upload-choice-row">
-                                <input id="id_picture" name="picture" type="file" accept="image/*">
-                                <div class="upload-bar-inner">
-                                    <span class="upload-file-name" id="profile-picture-file-name">No file chosen</span>
-                                    <label class="upload-choice-button" for="id_picture">Browse</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-field">
-                            <span class="field-label">Account type</span>
-                            <div class="role-options">
-                                {% for choice in profile_form.role %}
-                                    <label class="role-option">
-                                        {{ choice.tag }}
-                                        <span>{{ choice.choice_label }}</span>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div class="auth-actions">
-                            <button class="submit-btn" type="submit" name="submit">Register</button>
-                            <a href="{% url 'rango:login' %}">Log in instead</a>
-                        </div>
-                    </form>
+<link rel="stylesheet" type="text/css" href="{% static 'css/Sign_up.css' %}">
+
+<div class="page auth-page">
+    <div class="auth-card">
+        <h1>Register</h1>
+
+        {% if registered %}
+            <p>Thank you for registering.</p>
+            <a class="return-link" href="{% url 'rango:index' %}">Return to the homepage</a>
+        {% else %}
+            <form id="user_form" method="post" action="{% url 'rango:register' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if user_form.non_field_errors %}
+                    <ul class="errorlist">
+                        {% for error in user_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
                 {% endif %}
-            </div>
-        </div>
-        <script>
-            (function() {
-                const input = document.getElementById('id_picture');
-                const fileName = document.getElementById('profile-picture-file-name');
-                if (!input || !fileName) return;
-                input.addEventListener('change', function() {
-                    fileName.textContent = input.files && input.files.length ? input.files[0].name : 'No file chosen';
-                });
-            })();
-        </script>
+
+                <div class="form-field">
+                    <label for="{{ user_form.username.id_for_label }}">Username</label>
+                    {{ user_form.username }}
+                    {% if user_form.username.errors %}
+                        <ul class="errorlist">
+                            {% for error in user_form.username.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ user_form.email.id_for_label }}">Email</label>
+                    {{ user_form.email }}
+                    {% if user_form.email.errors %}
+                        <ul class="errorlist">
+                            {% for error in user_form.email.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="{{ user_form.password.id_for_label }}">Password</label>
+                    {{ user_form.password }}
+                    {% if user_form.password.errors %}
+                        <ul class="errorlist">
+                            {% for error in user_form.password.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-field">
+                    <label for="confirm_password">Confirm password</label>
+                    <input id="confirm_password" type="password" autocomplete="new-password" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="id_picture">Profile picture</label>
+                    <div class="upload-choice-row">
+                        {{ profile_form.picture }}
+                        {% if profile_form.picture.errors %}
+                            <ul class="errorlist">
+                                {% for error in profile_form.picture.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <div class="upload-bar-inner">
+                            <span class="upload-file-name" id="profile-picture-file-name">No file chosen</span>
+                            <label class="upload-choice-button" for="id_picture">Browse</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <span class="field-label">Account type</span>
+                    <div class="role-options">
+                        {% for choice in profile_form.role %}
+                            <label class="role-option">
+                                {{ choice.tag }}
+                                <span>{{ choice.choice_label }}</span>
+                            </label>
+                        {% endfor %}
+                        {% if profile_form.role.errors %}
+                            <ul class="errorlist">
+                                {% for error in profile_form.role.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="auth-actions">
+                    <button class="submit-btn" type="submit" name="submit">Register</button>
+                    <a href="{% url 'rango:login' %}">Log in instead</a>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+(function() {
+    const input = document.getElementById('id_picture');
+    const fileName = document.getElementById('profile-picture-file-name');
+    if (!input || !fileName) return;
+    input.addEventListener('change', function() {
+        fileName.textContent = input.files && input.files.length ? input.files[0].name : 'No file chosen';
+    });
+})();
+</script>
 {% endblock %}
