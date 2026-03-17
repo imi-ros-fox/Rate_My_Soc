@@ -28,7 +28,7 @@ SECRET_KEY = 'w!h(1y41yt7c35^#_qmlqs0f#rofm%ldn&-@zz$o8hd1zc5@ea'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['http://RateMySoc.pythonanywhere.com']
+ALLOWED_HOSTS = ['ratemysoc.pythonanywhere.com']
 
 
 # Application definition
