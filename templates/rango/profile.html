@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}Profile{% endblock %}
+
+{% block body_block %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile.css' %}">
+
+<div class="profile-page">
+
+    <h1 class="profile-title">Profile</h1>
+
+    <div class="profile-layout">
+
+        <div class="profile-card">
+            <div class="avatar">
+                {% if profile.picture %}
+                    <img src="{{ profile.picture.url }}" alt="{{ profile_user.username }}">
+                {% else %}
+                    <span>{{ profile_user.username|slice:":1"|upper }}</span>
+                {% endif %}
+            </div>
+
+            <div class="fields">
+                <div class="field">
+                    <label>First Name</label>
+                    <div class="value">{{ profile_user.first_name|default:"—" }}</div>
+                </div>
+                <div class="field">
+                    <label>Last Name</label>
+                    <div class="value">{{ profile_user.last_name|default:"—" }}</div>
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <div class="value">{{ profile_user.email|default:"—" }}</div>
+                </div>
+                <div class="field">
+                    <label>Username</label>
+                    <div class="value">{{ profile_user.username }}</div>
+                </div>
+                <div class="field">
+                    <label>Role</label>
+                    <div class="value">{{ profile.get_role_display }}</div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn" onclick="document.getElementById('popup-edit').classList.add('active')">Change details</button>
+                <button class="btn btn-red" onclick="document.getElementById('popup-delete').classList.add('active')">Delete account</button>
+            </div>
+        </div>
+
+        <div class="right-col">
+            <div class="section">
+                <h2>Reviews</h2>
+                <div class="section-body">
+                    {% for review in reviews %}
+                    <div class="review-card">
+                        <div class="review-top">
+                            <span class="review-text">{{ review.comment }}</span>
+                            <span class="tag">{{ review.society.name }}</span>
+                        </div>
+                        <div class="review-btns">
+                            <a href="{% url 'rango:society_detail' review.society.pk %}" class="tag">view</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty">No reviews yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Upvotes</h2>
+                <div class="section-body">
+                    {% for upvote in upvotes %}
+                    <div class="review-card">
+                        <div class="review-top">
+                            <span class="review-text">{{ upvote.review.comment }}</span>
+                            <span class="tag">{{ upvote.review.society.name }}</span>
+                        </div>
+                        <div class="review-btns">
+                            <a href="{% url 'rango:upvote_review' upvote.review.id %}" class="tag">remove upvote</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty">No upvotes yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="popup" id="popup-edit">
+    <div class="popup-box">
+        <h2 class="popup-title">Change details</h2>
+        <form method="post" action="{% url 'rango:edit_profile' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="popup-fields">
+                <div class="field">
+                    <label>First Name</label>
+                    <input type="text" name="first_name" class="text-input" value="{{ profile_user.first_name }}">
+                </div>
+                <div class="field">
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" class="text-input" value="{{ profile_user.last_name }}">
+                </div>
+                <div class="field">
+                    <label>Email</label>
+                    <input type="email" name="email" class="text-input" value="{{ profile_user.email }}">
+                </div>
+                <div class="field">
+                    <label>Bio</label>
+                    <textarea name="bio" class="text-input" rows="3">{{ profile.bio }}</textarea>
+                </div>
+                <div class="field">
+                    <label>Profile picture</label>
+                    <input type="file" name="picture" accept="image/*">
+                </div>
+            </div>
+            <div class="popup-btns">
+                <button type="submit" class="btn">Save changes</button>
+                <button type="button" class="btn btn-gray" onclick="document.getElementById('popup-edit').classList.remove('active')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="popup" id="popup-delete">
+    <div class="popup-box">
+        <h2 class="popup-title">Delete account</h2>
+        <h4>Are you sure you want to delete your account?</h4>
+        <form method="post" action="{% url 'rango:delete_profile'%}">
+            <div class="popup-btns">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-red">Delete account</button>
+                <button type="button" class="btn btn-gray" onclick="document.getElementById('popup-delete').classList.remove('active')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

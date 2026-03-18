@@ -25,8 +25,8 @@
         <div class="profile_logged_in">
             <button class= "dropdown_logged_in">Profile</button>
             <div class="Logged_in_content">
-                <a href="#">My Profile</a> <!--change # whwen profile page is ready-->
-                <a href="{% url 'rango:logout' %}">Log Out</a> <!--change # when logout page is ready-->
+                <a href="{% url 'rango:profile' user.username %}">My Profile</a> 
+                <a href="{% url 'rango:logout' %}">Log Out</a>
             </div>
         </div>
     {% else %} 
