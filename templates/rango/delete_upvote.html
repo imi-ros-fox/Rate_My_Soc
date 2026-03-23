@@ -1,0 +1,12 @@
+<h2>Remove Upvote</h2>
+
+<p>Are you sure you want to remove your upvote for this review?</p>
+
+<blockquote>{{ upvote.review.comment }}</blockquote>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, remove upvote</button>
+</form>
+
+<a href="{% url 'rango:my_upvotes' %}">Cancel</a>
