@@ -1,0 +1,16 @@
+<h2>My Reviews</h2>
+
+{% for review in reviews %}
+    <div class="review-card">
+        <h3>{{ review.society.name }}</h3>
+        <p>{{ review.comment }}</p>
+        <small>{{ review.created_at }}</small>
+
+        <div>
+            <a href="{% url 'rango:edit_review' review.pk %}">Edit</a>
+            <a href="{% url 'rango:delete_review' review.pk %}">Delete</a>
+        </div>
+    </div>
+{% empty %}
+    <p>You have no reviews yet.</p>
+{% endfor %}

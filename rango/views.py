@@ -163,6 +163,9 @@ def profile_view(request, username):
     try:
         user = User.objects.get(username=username)
         profile = UserProfile.objects.get(user=user)
+        reviews = Review.objects.filter(user=request.user).select_related('society').order_by('-created_at')
+        upvotes = Upvote.objects.filter(user=request.user).select_related('review', 'review__society').order_by(
+            '-created_at')
     except User.DoesNotExist:
         messages.error(request, 'User not found')
         return redirect('rango:index')
@@ -180,6 +183,8 @@ def profile_view(request, username):
         'profile': profile,
         'is_own_profile': request.user == user,
         'societies_managed': societies_managed,
+        'reviews': reviews,
+        'upvotes': upvotes,
     }
 
     return render(request, 'rango/profile.html', context)
@@ -499,3 +504,62 @@ def top_rated_societies(request):
         'N': N
     }
     return render(request, 'rango/top_societies.html', context)
+
+@login_required
+def my_reviews(request):
+    reviews = Review.objects.filter(user=request.user).select_related('society').order_by('-created_at')
+
+    return render(request, 'rango/my_reviews.html', {
+        'reviews': reviews
+    })
+
+@login_required
+def edit_review(request, pk):
+    review = get_object_or_404(Review, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Review updated")
+            return redirect('rango:my_reviews')
+    else:
+        form = ReviewForm(instance=review)
+
+    return render(request, 'rango/edit_review.html', {
+        'form': form,
+        'review': review
+    })
+
+@login_required
+def delete_review(request, pk):
+    review = get_object_or_404(Review, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        review.delete()
+        messages.success(request, "Review deleted")
+        return redirect('rango:my_reviews')
+
+    return render(request, 'rango/delete_review.html', {
+        'review': review
+    })
+
+@login_required
+def my_upvotes(request):
+    upvotes = Upvote.objects.filter(user=request.user).select_related('review', 'review__society').order_by('-created_at')
+
+    return render(request, 'rango/my_upvotes.html', {
+        'upvotes': upvotes
+    })
+
+@login_required
+def delete_upvote(request, pk):
+    upvote = get_object_or_404(Upvote, pk=pk, user=request.user)
+
+    if request.method == 'POST':
+        upvote.delete()
+        messages.success(request, "Upvote removed")
+        return redirect('rango:my_upvotes')
+
+    return render(request, 'rango/delete_upvote.html', {'upvote': upvote})
+
