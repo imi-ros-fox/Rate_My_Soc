@@ -11,9 +11,10 @@ urlpatterns = [
     path('restricted/', views.restricted, name='restricted'),
     path('logout/', views.user_logout, name='logout'),
     path('create_soc/', views.create_soc, name='create_Soc'),
-    path('profile/<str:username>/', views.profile_view, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/delete/', views.delete_profile, name='delete_profile'),
+    path('profile/<str:username>/', views.profile_view, name='profile'),
+
 
     #society CRUD
     path('societies/', views.society_list, name='society_list'),
