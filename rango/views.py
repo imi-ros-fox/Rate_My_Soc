@@ -159,6 +159,7 @@ def user_login(request):
 #Created a new profile view
 @login_required
 def profile_view(request, username):
+    print("view: profile view")
     try:
         user = User.objects.get(username=username)
         profile = UserProfile.objects.get(user=user)
@@ -168,7 +169,7 @@ def profile_view(request, username):
     except UserProfile.DoesNotExist:
         #Create a profile if it doesn't exist
         profile = UserProfile.objects.create(user=user)
-
+    #TODO: detect managed society
     if profile.role == 'PRESIDENT':
         societies_managed = []
     else:
@@ -185,27 +186,29 @@ def profile_view(request, username):
 
 #Created a new edit profile view
 from .forms import EditProfileForm
-
 @login_required
 def edit_profile(request):
+    print("view: edit profile")
+    messages.info(request, "Editing profile for:" + request.user.username)
     try:
         profile = request.user.userprofile
     except UserProfile.DoesNotExist:
         profile = UserProfile.objects.create(user=request.user)
-    
+
     if request.method == 'POST':
-        form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        form = (EditProfileForm(request.POST, request.FILES, instance=profile, user=request.user))
         if form.is_valid():
+            print("VALID")
             form.save()
             messages.success(request, 'Profile updated successfully')
             return redirect('rango:profile', username=request.user.username)
         else:
-            messages.error(request, 'Please fix the following errors')
+            print("ERRORS:", form.errors)
+            messages.error(request, 'Please fix the errors below')
     else:
-        form = EditProfileForm(instance=profile)
-    
-    return render(request, 'rango/edit_profile.html', {'form': form})
+        form = EditProfileForm(instance=profile, user=request.user)
 
+    return render(request, 'rango/edit_profile.html', {'form': form})
 #Created a delete profile view
 
 @login_required

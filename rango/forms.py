@@ -32,17 +32,36 @@ class UserProfileForm(forms.ModelForm):
         model = UserProfile
         fields = ('picture', 'role', 'bio')
 
-
 class EditProfileForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30, required=False)
+    last_name = forms.CharField(max_length=30, required=False)
+    email = forms.EmailField(required=False)
 
     class Meta:
         model = UserProfile
-        fields = ('picture', 'bio')
+        fields = ('bio', 'picture', 'role')
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        user = kwargs.pop('user', None)
+        super(EditProfileForm, self).__init__(*args, **kwargs)
         self.fields['picture'].required = False
         self.fields['bio'].required = False
+        self.fields['role'].required = False
+        if user:
+            self.fields['first_name'].initial = user.first_name
+            self.fields['last_name'].initial = user.last_name
+            self.fields['email'].initial = user.email
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        user = profile.user
+        user.first_name = self.cleaned_data.get('first_name', '')
+        user.last_name = self.cleaned_data.get('last_name', '')
+        user.email = self.cleaned_data.get('email', '')
+        if commit:
+            user.save()
+            profile.save()
+        return profile
 
 class SocietyForm(forms.ModelForm):
     class Meta:
