@@ -6,6 +6,8 @@ from rango.forms import UserForm, UserProfileForm, SocietyForm, CategoryForm, Ra
 from rango import forms, views
 from django import forms
 from rango import forms as rango_forms
+from django.urls import reverse
+from django.test import TestCase, Client
 
 def create_test_user(username='testuser', password='testpassword123', role='STUDENT'):
     #Helper function to create a test user with a profile
@@ -323,6 +325,273 @@ class FormTests(TestCase):
         self.assertTrue(form.is_valid())
         
         
+#Views Tests
+
+
+class IndexViewTests(TestCase):
+    #Tests for the index view.
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user()
+        self.category = create_test_category('Sports')
+        self.society1 = create_test_society('Football Club', self.user, [self.category])
+        self.society2 = create_test_society('Basketball Club', self.user, [self.category])
+        
+        # Add ratings for top societies
+        create_test_rating(self.society1, self.user, 5)
+        other_user = create_test_user('otheruser')
+        create_test_rating(self.society1, other_user, 4)
+
+    def test_index_view_uses_correct_template(self):
+        """Test that index view uses the correct template."""
+        response = self.client.get(reverse('rango:index'))
+        self.assertTemplateUsed(response, 'rango/index.html')  
+
+    def test_index_view_context(self):
+        #Test that index view passes correct context variables.
+        response = self.client.get(reverse('rango:index'))
+        
+        self.assertIn('societies', response.context)
+        self.assertIn('top_societies', response.context)
+        self.assertIn('categories', response.context)
+        
+        # Check societies list
+        societies = response.context['societies']
+        self.assertEqual(societies.count(), 2)
+        
+        # Check categories list
+        categories = response.context['categories']
+        self.assertEqual(categories.count(), 1)
+
+    def test_index_category_filter(self):
+        #Test filtering societies by category.
+        # Create another category and society
+        another_category = create_test_category('Music')
+        create_test_society('Choir', self.user, [another_category])
+        
+        # Filter by Sports category
+        response = self.client.get(reverse('rango:index'), {'cat': 'Sports'})
+        societies = response.context['societies']
+        self.assertEqual(societies.count(), 2)
+        self.assertTrue(all('Sports' in [c.name for c in s.categories.all()] for s in societies))
+    
+class AboutViewTests(TestCase):
+    #Tests for the about view.
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user()
+        self.society = create_test_society(created_by=self.user)
+        create_test_rating(self.society, self.user, 5)   
+    
+    def test_about_view_uses_correct_template(self):
+        #Test that about view uses the correct template.
+        response = self.client.get(reverse('rango:about'))
+        self.assertTemplateUsed(response, 'rango/about.html')
+    
+    def test_about_view_context(self):
+        #Test that about view passes correct context variables.
+        response = self.client.get(reverse('rango:about'))
+        
+        self.assertIn('visits', response.context)
+        self.assertIn('total_users', response.context)
+        self.assertIn('total_societies', response.context)
+        self.assertIn('top_societies', response.context)
+        
+        self.assertEqual(response.context['total_users'], User.objects.count())
+        self.assertEqual(response.context['total_societies'], Society.objects.count())
+    
+
+class RegistrationViewTests(TestCase):
+    #Tests for the registration view.
+    
+    def setUp(self):
+        self.client = Client()
+    
+    
+    def test_register_view_uses_correct_template(self):
+        #Test that registration view uses the correct template.
+        response = self.client.get(reverse('rango:register'))
+        self.assertTemplateUsed(response, 'rango/register.html')
+    
+    def test_register_valid_user(self):
+        #Test successful user registration.
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@test.com',
+            'password': 'securepass123',
+            'role': 'STUDENT',
+            'bio': 'Test bio'
+        }
+        response = self.client.post(reverse('rango:register'), data)
+        
+        
+        # Check user was created
+        user = User.objects.get(username='newuser')
+        self.assertIsNotNone(user)
+        self.assertTrue(user.check_password('securepass123'))
+        self.assertEqual(user.email, 'newuser@test.com')
+        
+        # Check profile was created
+        self.assertEqual(user.userprofile.role, 'STUDENT')
+        self.assertEqual(user.userprofile.bio, 'Test bio')
+        
+        # User should be logged in automatically
+        self.assertIn('_auth_user_id', self.client.session)
+    
+    def test_register_password_too_short(self):
+        #Test registration with password less than 8 characters.
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@test.com',
+            'password': 'short',
+            'role': 'STUDENT'
+        }
+        response = self.client.post(reverse('rango:register'), data)
+        
+        # User should not be created
+        self.assertFalse(User.objects.filter(username='newuser').exists())
+
+
+
+class LoginViewTests(TestCase):
+    #Tests for the login view.
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user('testuser', 'correctpass')
+    
+    
+    def test_login_view_uses_correct_template(self):
+        #Test that login view uses the correct template.
+        response = self.client.get(reverse('rango:login'))
+        self.assertTemplateUsed(response, 'rango/login.html')
+    
+    def test_login_valid_credentials(self):
+        #Test successful login with valid credentials.
+        response = self.client.post(reverse('rango:login'), {
+            'username': 'testuser',
+            'password': 'correctpass'
+        })
+        
+        
+        self.assertEqual(response.url, reverse('rango:index'))
+        self.assertIn('_auth_user_id', self.client.session)
+    
+    def test_login_invalid_credentials(self):
+        #Test login with invalid credentials."""
+        response = self.client.post(reverse('rango:login'), {
+            'username': 'testuser',
+            'password': 'wrongpass'
+        })
+        
+        # Stays on login page
+        self.assertNotIn('_auth_user_id', self.client.session)
+    
+    def test_login_remember_me(self):
+        #Test remember me functionality.
+        response = self.client.post(reverse('rango:login'), {
+            'username': 'testuser',
+            'password': 'correctpass',
+            'remember_me': 'on'
+        })
+        
+        # Check session expiry is set to 2 weeks (1209600 seconds)
+        self.assertEqual(self.client.session.get_expiry_age(), 1209600)
+    
+    def test_login_next_url_redirect(self):
+        #Test redirect to next URL after login.
+        next_url = reverse('rango:restricted')
+        response = self.client.post(
+            reverse('rango:login'),
+            {
+                'username': 'testuser',
+                'password': 'correctpass',
+                'next': next_url
+            }
+        )
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, next_url)
+
+
+class ProfileViewTests(TestCase):
+    #Tests for the profile view.
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user('testuser')
+        self.client.login(username='testuser', password='testpassword123')
+        
+    
+    
+    def test_profile_view_uses_correct_template(self):
+        #Test that profile view uses the correct template.
+        response = self.client.get(reverse('rango:profile', kwargs={'username': 'testuser'}))
+        self.assertTemplateUsed(response, 'rango/profile.html')
+    
+    def test_profile_view_context(self):
+        #Test that profile view passes correct context.
+        society = create_test_society(created_by=self.user)
+        review = create_test_review(society, self.user)
+        upvote = Upvote.objects.create(user=self.user, review=review)
+        
+        response = self.client.get(reverse('rango:profile', kwargs={'username': 'testuser'}))
+        
+        self.assertEqual(response.context['profile_user'], self.user)
+        self.assertEqual(response.context['profile'], self.user.userprofile)
+        self.assertTrue(response.context['is_own_profile'])
+        self.assertEqual(response.context['reviews'].count(), 1)
+        self.assertEqual(response.context['upvotes'].count(), 1)
+
+
+class EditProfileViewTests(TestCase):
+    #Tests for the edit profile view.
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user('testuser')
+        self.client.login(username='testuser', password='testpassword123')
+    
+    
+    def test_edit_profile_view_uses_correct_template(self):
+        #Test that edit profile view uses the correct template.
+        response = self.client.get(reverse('rango:edit_profile'))
+        self.assertTemplateUsed(response, 'rango/edit_profile.html')
+    
+    def test_edit_profile_valid_data(self):
+        #Test successful profile update.
+        data = {
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'email': 'john@test.com',
+            'bio': 'Updated bio',
+            'role': 'PRESIDENT'
+        }
+        response = self.client.post(reverse('rango:edit_profile'), data)
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('rango:profile', kwargs={'username': 'testuser'}))
+        
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, 'John')
+        self.assertEqual(self.user.last_name, 'Doe')
+        self.assertEqual(self.user.email, 'john@test.com')
+        self.assertEqual(self.user.userprofile.bio, 'Updated bio')
+        self.assertEqual(self.user.userprofile.role, 'PRESIDENT')
+    
+    def test_edit_profile_requires_login(self):
+        #Test that edit profile requires authentication.
+        self.client.logout()
+        response = self.client.get(reverse('rango:edit_profile'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse('rango:login')))
+
+    
+    
+
+
 
 
 
