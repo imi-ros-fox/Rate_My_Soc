@@ -18,7 +18,16 @@ def index(request):
 
     visitor_cookie_handler(request)
     category_filter = request.GET.get('cat')
-    societies = Society.objects.all().order_by('name')
+    sort_filter = request.GET.get('sort', 'az')
+
+    societies = Society.objects.annotate(
+        avg_rating=Avg('rating__star')
+    )
+
+    if sort_filter == 'newest':
+        societies = societies.order_by('-created_at')
+    else:
+        societies = societies.order_by('name')
 
     if category_filter:
         societies = societies.filter(categories__name__iexact=category_filter)
@@ -33,6 +42,7 @@ def index(request):
         'societies': societies,
         'top_societies': top_societies,
         'categories': categories,
+        'selected_sort': sort_filter,
     }
 
     response = render(request, 'rango/home/index.html', context=context_dict)
