@@ -89,6 +89,10 @@
                         </div>
                         <div class="review-btns">
                             <a href="{% url 'rango:society_detail' review.society.pk %}" class="tag">view</a>
+                            {% if is_own_profile %}
+                            <a href="{% url 'rango:edit_review' review.pk %}" class="tag">edit</a>
+                            <a href="{% url 'rango:delete_review' review.pk %}" class="tag">delete</a>
+                            {% endif %}
                         </div>
                     </div>
                     {% empty %}

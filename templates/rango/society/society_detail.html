@@ -37,7 +37,7 @@
             {% endif %}
         </div>
 
-        <a href="{% url 'rango:society_list' %}" class="btn">Back to societies</a>
+        <a href="{% url 'rango:index' %}" class="btn">Back to societies</a>
     </aside>
 
     <main class="detail-main">
@@ -85,6 +85,12 @@
                         <small class="review-date">{{ review.created_at }}</small>
                     </div>
                     <p class="review-text">{{ review.comment }}</p>
+                    {% if review.user == request.user %}
+                    <div class="review-actions">
+                        <a href="{% url 'rango:edit_review' review.pk %}" class="btn">Edit</a>
+                        <a href="{% url 'rango:delete_review' review.pk %}" class="btn">Delete</a>
+                    </div>
+                    {% endif %}
                     <form method="post" action="{% url 'rango:upvote_review' review.id %}">
                         {% csrf_token %}
                         <button type="submit" class="upvote-btn">

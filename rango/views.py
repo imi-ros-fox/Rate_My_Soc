@@ -260,7 +260,7 @@ def visitor_cookie_handler(request):
 def create_soc(request):
     if request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'Only Society Presidents can create societies.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     categories = Category.objects.all()
 
@@ -319,14 +319,14 @@ def edit_society(request, pk):
 
     if request.user != society.created_by or request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'You are not allowed to edit this society.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     if request.method == 'POST':
         form = SocietyForm(request.POST, request.FILES, instance=society)
         if form.is_valid():
             form.save()
             messages.success(request, 'Society updated successfully!')
-            return redirect('rango:society_list')
+            return redirect('rango:index')
     else:
         form = SocietyForm(instance=society)
     return render(request, 'rango/society/edit_society.html', {'form': form, 'society': society})
@@ -337,12 +337,12 @@ def delete_society(request, pk):
 
     if request.user != society.created_by or request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'You are not allowed to delete this society.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     if request.method == 'POST':
         society.delete()
         messages.success(request, 'Society deleted successfully!')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     return render(request, 'rango/society/delete_society.html', {'society': society})
 
@@ -505,7 +505,7 @@ def top_rated_societies(request):
 def my_reviews(request):
     reviews = Review.objects.filter(user=request.user).select_related('society').order_by('-created_at')
 
-    return render(request, 'rango/my_reviews.html', {
+    return render(request, 'rango/society/my_reviews.html', {
         'reviews': reviews
     })
 
@@ -522,7 +522,7 @@ def edit_review(request, pk):
     else:
         form = ReviewForm(instance=review)
 
-    return render(request, 'rango/edit_review.html', {
+    return render(request, 'rango/society/edit_review.html', {
         'form': form,
         'review': review
     })
@@ -536,7 +536,7 @@ def delete_review(request, pk):
         messages.success(request, "Review deleted")
         return redirect('rango:my_reviews')
 
-    return render(request, 'rango/delete_review.html', {
+    return render(request, 'rango/society/delete_review.html', {
         'review': review
     })
 
@@ -544,7 +544,7 @@ def delete_review(request, pk):
 def my_upvotes(request):
     upvotes = Upvote.objects.filter(user=request.user).select_related('review', 'review__society').order_by('-created_at')
 
-    return render(request, 'rango/my_upvotes.html', {
+    return render(request, 'rango/society/my_upvotes.html', {
         'upvotes': upvotes
     })
 
@@ -557,5 +557,5 @@ def delete_upvote(request, pk):
         messages.success(request, "Upvote removed")
         return redirect('rango:my_upvotes')
 
-    return render(request, 'rango/delete_upvote.html', {'upvote': upvote})
+    return render(request, 'rango/society/delete_upvote.html', {'upvote': upvote})
 
