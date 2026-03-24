@@ -1,0 +1,109 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    {{ society.name }}
+{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/society_details.css' %}">{% endblock %}
+
+{% block body_block %}
+
+<div class="detail-page">
+
+    <aside class="detail-sidebar">
+        <div class="detail-logo">
+            {% if society.image %}
+                <img src="{{ society.image.url }}" alt="{{ society.name }}">
+            {% endif %}
+        </div>
+        <h1 class="detail-name">{{ society.name }}</h1>
+        <p class="detail-meta">Created by <strong>{{ society.created_by.username }}</strong></p>
+
+        <div class="detail-categories">
+            {% for cat in society.categories.all %}
+                <span class="tag">{{ cat.name }}</span>
+            {% endfor %}
+        </div>
+
+        <p class="detail-desc">{{ society.description }}</p>
+
+        <div class="detail-rating-avg">
+            {% if avg_rating %}
+                <span class="star-display" style="--rating: {{ avg_rating }};"></span>
+                <span>{{ avg_rating|floatformat:1 }} / 5</span>
+            {% else %}
+                <span>No ratings yet</span>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'rango:index' %}" class="btn">Back to societies</a>
+    </aside>
+
+    <main class="detail-main">
+
+        <div class="section">
+            <h2>Your rating</h2>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'rango:rate_society' society.pk %}">
+                {% csrf_token %}
+                <div class="rating-options">
+                    {% for i in range_5 reversed %}
+                    <label class="star-label">
+                        <input type="radio" name="star" value="{{ i }}" {% if user_rating and user_rating.star == i %}checked{% endif %}>
+                        <i class="fa fa-star"></i>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn">Submit rating</button>
+            </form>
+            {% else %}
+            <p>You must <a href="{% url 'rango:login' %}">log in</a> to rate this society.</p>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h2>Write a review</h2>
+            {% if user_review %}
+                <p class="empty">You have already reviewed this society.</p>
+            {% else %}
+            <form method="post" action="{% url 'rango:add_review' society.pk %}">
+                {% csrf_token %}
+                {{ review_form.comment }}
+                <button type="submit" class="btn">Post review</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h2>Reviews</h2>
+            <div class="reviews-list">
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-top">
+                        <strong class="review-user">{{ review.user.username }}</strong>
+                        <small class="review-date">{{ review.created_at }}</small>
+                    </div>
+                    <p class="review-text">{{ review.comment }}</p>
+                    {% if review.user == request.user %}
+                    <div class="review-actions">
+                        <a href="{% url 'rango:edit_review' review.pk %}" class="btn">Edit</a>
+                        <a href="{% url 'rango:delete_review' review.pk %}" class="btn">Delete</a>
+                    </div>
+                    {% endif %}
+                    <form method="post" action="{% url 'rango:upvote_review' review.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="upvote-btn">
+                            👍 {{ review.upvote_count }}
+                        </button>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="empty">No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </main>
+</div>
+{% endblock %}

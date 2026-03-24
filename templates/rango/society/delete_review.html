@@ -1,0 +1,24 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}Delete Review{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/Sign_up.css' %}">{% endblock %}
+
+{% block body_block %}
+
+<div class="page auth-page">
+    <div class="auth-card">
+        <h1>Delete Review</h1>
+        <p>Are you sure you want to delete your review for <strong>{{ review.society.name }}</strong>?</p>
+        <blockquote>{{ review.comment }}</blockquote>
+        <form method="post">
+            {% csrf_token %}
+            <div class="auth-actions">
+                <button class="submit-btn" type="submit">Yes, delete</button>
+                <a href="{% url 'rango:society_detail' review.society.pk %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

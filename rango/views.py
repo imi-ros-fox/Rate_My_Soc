@@ -18,7 +18,16 @@ def index(request):
 
     visitor_cookie_handler(request)
     category_filter = request.GET.get('cat')
-    societies = Society.objects.all().order_by('name')
+    sort_filter = request.GET.get('sort', 'az')
+
+    societies = Society.objects.annotate(
+        avg_rating=Avg('rating__star')
+    )
+
+    if sort_filter == 'newest':
+        societies = societies.order_by('-created_at')
+    else:
+        societies = societies.order_by('name')
 
     if category_filter:
         societies = societies.filter(categories__name__iexact=category_filter)
@@ -33,9 +42,10 @@ def index(request):
         'societies': societies,
         'top_societies': top_societies,
         'categories': categories,
+        'selected_sort': sort_filter,
     }
 
-    response = render(request, 'rango/index.html', context=context_dict)
+    response = render(request, 'rango/home/index.html', context=context_dict)
     return response
 
 def about(request):
@@ -68,7 +78,7 @@ def register(request):
             password = user_form.cleaned_data.get('password')
             if len(password) < 8:
                 messages.error(request, 'Password must be at least 8 characters long')
-                return render(request, 'rango/register.html', {
+                return render(request, 'rango/authentication/register.html', {
                     'user_form': user_form,
                     'profile_form': profile_form,
                     'registered': registered
@@ -107,7 +117,7 @@ def register(request):
         user_form = UserForm()
         profile_form = UserProfileForm()
 
-    return render(request, 'rango/register.html', {
+    return render(request, 'rango/authentication/register.html', {
         'user_form': user_form,
         'profile_form': profile_form,
         'registered': registered
@@ -154,7 +164,7 @@ def user_login(request):
             print(f"Invalid login details: {username}, {password}")
             return HttpResponse("Invalid login details supplied.")
     else:
-        return render(request, 'rango/login.html')
+        return render(request, 'rango/authentication/login.html')
 
 #Created a new profile view
 @login_required
@@ -172,11 +182,7 @@ def profile_view(request, username):
     except UserProfile.DoesNotExist:
         #Create a profile if it doesn't exist
         profile = UserProfile.objects.create(user=user)
-    #TODO: detect managed society
-    if profile.role == 'PRESIDENT':
-        societies_managed = []
-    else:
-        societies_managed = []
+    societies_managed = Society.objects.filter(created_by=user)
     
     context = {
         'profile_user': user,
@@ -187,7 +193,7 @@ def profile_view(request, username):
         'upvotes': upvotes,
     }
 
-    return render(request, 'rango/profile.html', context)
+    return render(request, 'rango/profile/profile.html', context)
 
 #Created a new edit profile view
 from .forms import EditProfileForm
@@ -213,7 +219,7 @@ def edit_profile(request):
     else:
         form = EditProfileForm(instance=profile, user=request.user)
 
-    return render(request, 'rango/edit_profile.html', {'form': form})
+    return render(request, 'rango/profile/edit_profile.html', {'form': form})
 #Created a delete profile view
 
 @login_required
@@ -231,7 +237,7 @@ def delete_profile(request):
         user.delete()
         messages.success(request, 'Account has been deleted.')
         return redirect('rango:index')
-    return render(request, 'rango/delete_profile.html')
+    return render(request, 'rango/profile/delete_profile.html')
 
 @login_required
 def restricted(request):
@@ -264,7 +270,7 @@ def visitor_cookie_handler(request):
 def create_soc(request):
     if request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'Only Society Presidents can create societies.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     categories = Category.objects.all()
 
@@ -295,14 +301,14 @@ def create_soc(request):
 @login_required
 def society_list(request):
     societies = Society.objects.all()
-    return render(request, 'rango/society_list.html', {'societies': societies})
+    return render(request, 'rango/society/society_list.html', {'societies': societies})
 
 @login_required
 def create_society(request):
 
     if request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'Only Society Presidents can create societies.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     if request.method == 'POST':
         form = SocietyForm(request.POST, request.FILES)
@@ -312,10 +318,10 @@ def create_society(request):
             society.save()
             form.save_m2m()
             messages.success(request, 'Society created successfully!')
-            return redirect('rango:society_list')
+            return redirect('rango:index')
     else:
         form = SocietyForm()
-    return render(request, 'rango/create_society.html', {'form': form})
+    return render(request, 'rango/society/create_soc.html', {'form': form})
 
 @login_required
 def edit_society(request, pk):
@@ -323,17 +329,17 @@ def edit_society(request, pk):
 
     if request.user != society.created_by or request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'You are not allowed to edit this society.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     if request.method == 'POST':
         form = SocietyForm(request.POST, request.FILES, instance=society)
         if form.is_valid():
             form.save()
             messages.success(request, 'Society updated successfully!')
-            return redirect('rango:society_list')
+            return redirect('rango:index')
     else:
         form = SocietyForm(instance=society)
-    return render(request, 'rango/edit_society.html', {'form': form, 'society': society})
+    return render(request, 'rango/society/edit_society.html', {'form': form, 'society': society})
 
 @login_required
 def delete_society(request, pk):
@@ -341,14 +347,14 @@ def delete_society(request, pk):
 
     if request.user != society.created_by or request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'You are not allowed to delete this society.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     if request.method == 'POST':
         society.delete()
         messages.success(request, 'Society deleted successfully!')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
-    return render(request, 'rango/delete_society.html', {'society': society})
+    return render(request, 'rango/society/delete_society.html', {'society': society})
 
 @login_required
 def category_list(request):
@@ -430,7 +436,7 @@ def society_detail(request, pk):
         'review_form': review_form,
         'range_5': range_5,
     }
-    return render(request, 'rango/society_detail.html', context)
+    return render(request, 'rango/society/society_detail.html', context)
 
 
 @login_required
@@ -490,7 +496,7 @@ def search_societies(request):
         'query': query,
         'results': results
     }
-    return render(request, 'rango/search_results.html', context)
+    return render(request, 'rango/home/search_results.html', context)
 
 def top_rated_societies(request):
     N = 5
@@ -509,7 +515,7 @@ def top_rated_societies(request):
 def my_reviews(request):
     reviews = Review.objects.filter(user=request.user).select_related('society').order_by('-created_at')
 
-    return render(request, 'rango/my_reviews.html', {
+    return render(request, 'rango/society/my_reviews.html', {
         'reviews': reviews
     })
 
@@ -526,7 +532,7 @@ def edit_review(request, pk):
     else:
         form = ReviewForm(instance=review)
 
-    return render(request, 'rango/edit_review.html', {
+    return render(request, 'rango/society/edit_review.html', {
         'form': form,
         'review': review
     })
@@ -540,7 +546,7 @@ def delete_review(request, pk):
         messages.success(request, "Review deleted")
         return redirect('rango:my_reviews')
 
-    return render(request, 'rango/delete_review.html', {
+    return render(request, 'rango/society/delete_review.html', {
         'review': review
     })
 
@@ -548,7 +554,7 @@ def delete_review(request, pk):
 def my_upvotes(request):
     upvotes = Upvote.objects.filter(user=request.user).select_related('review', 'review__society').order_by('-created_at')
 
-    return render(request, 'rango/my_upvotes.html', {
+    return render(request, 'rango/society/my_upvotes.html', {
         'upvotes': upvotes
     })
 
@@ -561,5 +567,5 @@ def delete_upvote(request, pk):
         messages.success(request, "Upvote removed")
         return redirect('rango:my_upvotes')
 
-    return render(request, 'rango/delete_upvote.html', {'upvote': upvote})
+    return render(request, 'rango/society/delete_upvote.html', {'upvote': upvote})
 

@@ -1,0 +1,138 @@
+.create-society-container {
+    width: 40%;
+    margin: auto;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: #d2eaff;
+}
+
+.create-society-container h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.create-society-container label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.form-errors,
+.field-errors {
+    margin-top: 0.5rem;
+    color: #8b1e1e;
+    font-weight: 600;
+}
+
+.form-errors ul,
+.field-errors ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.create-society-container input[type="text"],
+.create-society-container textarea {
+    width: 90%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 0;
+    background: #add9ff;
+}
+
+.tag-bubbles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+}
+
+.tag-bubble {
+    margin-top: 0;
+    font-weight: normal;
+}
+
+.tag-bubble input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.tag-bubble span {
+    display: inline-block;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: #e9f6ff;
+    color: #0f2a3d;
+}
+
+.tag-bubble input:checked + span {
+    background: #0f2a3d;
+    color: #ffffff;
+}
+
+.logo-upload-bar {
+    width: 95%;
+    margin-top: 0.5rem;
+    border-radius: 8px;
+    border: 0;
+    background: #add9ff;
+}
+
+.logo-upload-bar input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.logo-bar-inner {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+}
+
+.logo-file-name {
+    flex: 1;
+    min-width: 0;
+    padding: 0 0.5rem;
+    color: #1f2a37;
+    font-weight: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.logo-bar-inner .logo-upload-button {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: #0f2a3d;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.create-society-container button[type="submit"] {
+    margin-top: 1.5rem;
+    width: 100%;
+    background: #000000;
+    color: #ffffff;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.cancel-link {
+    display: block;
+    margin-top: 1rem;
+    text-align: center;
+    color: #1b2a4a;
+    text-decoration: none;
+}
+
+.cancel-link:hover {
+    text-decoration: underline;
+}

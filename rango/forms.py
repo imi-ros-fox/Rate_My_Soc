@@ -68,7 +68,7 @@ class SocietyForm(forms.ModelForm):
         model = Society
         fields = ['name', 'description', 'image', 'categories']
         widgets = {
-            'category': forms.CheckboxSelectMultiple(),
+            'categories': forms.CheckboxSelectMultiple(),
             'description': forms.Textarea(attrs={'rows':4}),
         }
 

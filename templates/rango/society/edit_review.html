@@ -1,0 +1,27 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}Edit Review{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/Sign_up.css' %}">{% endblock %}
+
+{% block body_block %}
+
+<div class="page auth-page">
+    <div class="auth-card">
+        <h1>Edit Review</h1>
+        <p>{{ review.society.name }}</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-field">
+                <label>Your review</label>
+                {{ form.comment }}
+            </div>
+            <div class="auth-actions">
+                <button class="submit-btn" type="submit">Save</button>
+                <a href="{% url 'rango:society_detail' review.society.pk %}">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
