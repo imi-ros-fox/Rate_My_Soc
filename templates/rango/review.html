@@ -5,9 +5,9 @@
 {% block title_block %} 
     Rate My Soc - Star Slider 
 {% endblock %}
-{% block body_block %}
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/review.css' %}">{% endblock %}
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% block body_block %}
 
 <div class="page">
     <div class="review-card">
@@ -31,89 +31,6 @@
     </div>  
 </div>
 
-<style>
-    .page{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: calc(100vh - 120px);
-    }
-    .review-card {
-        max-width: 420px;
-        padding: 1.5rem;
-        border: 1px solid #d7d7d7;
-        border-radius: 12px;
-        background: #d2eaff;
-    }
-      .review {
-        height: 80px;
-        padding: 1.5rem;
-        border: 0;
-        border-radius: 8px;
-        background: #add9ff;
-    }
-    
-    .submit-btn {
-        margin-top: 1rem;
-        background: #000000;
-        color: #ffffff;
-        width : fit-content;
-    }
-    .review-card h1 {
-        margin-bottom: 1rem;
-    }
-
-    .review-card form {
-        display: grid;
-        gap: 1rem;
-    }
-
-    .review-card label {
-        font-weight: 600;
-    }
-
-    .clickable-stars {
-        display: inline-flex;
-        gap: 0.1rem;
-    }
-
-    .star-btn {
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding: 0;
-        font: normal normal normal 14px/1 FontAwesome;
-        font-size: 3rem;
-        color: #000000;
-        transition: color 0.2s;
-        width: auto;
-    }
-
-    .star-btn::before {
-        content: "\f005";
-    }
-
-    .star-btn:hover {
-        color: #ffaa00;
-    }
-
-    .star-btn.active {
-        color: #ffaa00;
-    }
-
-    .rating-display {
-        font-weight: 600;
-        margin-left: 0.5rem;
-    }
-
-    .review-card button {
-        width: fit-content;
-        padding: 0.6rem 1rem;
-        border: 0;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-</style>
 
 <script>
     function setRating(value) {

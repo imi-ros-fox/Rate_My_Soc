@@ -1,18 +1,15 @@
 {% extends 'rango/base.html' %}
-{% block title_block %}
-    Top Rated Societies
-{% endblock %}
+{% block title_block %}Top Rated Societies{% endblock %}
 {% block body_block %}
 <h2>Top {{ N }} Rated Societies</h2>
-    <ul>
+<ul>
     {% for society in societies %}
         <p>
             {{ forloop.counter }}.
-                <a href="{% url 'rango:society_detail' society.pk %}">
-                    {{ society.name }}
-                </a>
-            ⭐ {{ society.avg_rating|floatformat:1 }}
+            <a href="{% url 'rango:society_detail' society.pk %}">{{ society.name }}</a>
+            <span class="star-display" style="--rating: {{ society.avg_rating }};"></span>
+            <small>{{ society.avg_rating|floatformat:1 }} / 5</small>
         </p>
     {% endfor %}
-    </ul>
+</ul>
 {% endblock %}

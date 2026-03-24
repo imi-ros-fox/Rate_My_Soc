@@ -172,11 +172,7 @@ def profile_view(request, username):
     except UserProfile.DoesNotExist:
         #Create a profile if it doesn't exist
         profile = UserProfile.objects.create(user=user)
-    #TODO: detect managed society
-    if profile.role == 'PRESIDENT':
-        societies_managed = []
-    else:
-        societies_managed = []
+    societies_managed = Society.objects.filter(created_by=user)
     
     context = {
         'profile_user': user,
@@ -302,7 +298,7 @@ def create_society(request):
 
     if request.user.userprofile.role != 'PRESIDENT':
         messages.error(request, 'Only Society Presidents can create societies.')
-        return redirect('rango:society_list')
+        return redirect('rango:index')
 
     if request.method == 'POST':
         form = SocietyForm(request.POST, request.FILES)
@@ -312,10 +308,10 @@ def create_society(request):
             society.save()
             form.save_m2m()
             messages.success(request, 'Society created successfully!')
-            return redirect('rango:society_list')
+            return redirect('rango:index')
     else:
         form = SocietyForm()
-    return render(request, 'rango/create_society.html', {'form': form})
+    return render(request, 'rango/create_soc.html', {'form': form})
 
 @login_required
 def edit_society(request, pk):
