@@ -3,9 +3,9 @@
 
 {% block title_block %}Societies{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/home_page.css' %}">{% endblock %}
+
 {% block body_block %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/home_page.css' %}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <div class="soc-page">
     <aside class="soc-sidebar">
@@ -15,12 +15,12 @@
             <li class="soc-sidebar-item">
                 <a href="{% url 'rango:society_detail' society.pk %}" class="soc-sidebar-link">
                     <div class="soc-sidebar-avatar">
-                        {% if society.logo %}
-                            <img src="{{ society.logo.url }}" alt="{{ society.name }}">
+                        {% if society.image %}
+                            <img src="{{ society.image.url }}" alt="{{ society.name }}">
                         {% endif %}
                     </div>
                     <span class="soc-sidebar-name">{{ society.name }}</span>
-                    <span class="soc-sidebar-stars" style="--rating: {{ society.average_rating|default:'0' }};"></span>
+                    <span class="soc-sidebar-stars" style="--rating: {{ society.avg_rating|default:'0' }};"></span>
                 </a>
             </li>
             {% empty %}
@@ -30,11 +30,16 @@
     </aside>
     <main class="soc-main">
         <div class="soc-main-header">
-            <h2 class="soc-main-title">Societies A–Z</h2>
+            <h2 class="soc-main-title">Societies</h2>
             <div class="soc-sort">
                 <details class="soc-sort-dropdown">
                     <summary class="soc-sort-btn">Sort by</summary>
                     <div class="soc-sort-panel">
+                        <p class="soc-sort-section-label">Sort</p>
+                        <ul class="soc-sort-list">
+                            <li><a href="?sort=newest">Most Recently Created</a></li>
+                            <li><a href="?sort=az">Alphabetically</a></li>
+                        </ul>
                         <p class="soc-sort-section-label">Categories</p>
                         <ul class="soc-sort-list">
                             {% for category in categories %}
@@ -49,12 +54,12 @@
             {% for society in societies %}
             <a href="{% url 'rango:society_detail' society.pk %}" class="soc-card">
                 <div class="soc-card-logo">
-                    {% if society.logo %}
-                        <img src="{{ society.logo.url }}" alt="{{ society.name }}">
+                    {% if society.image %}
+                        <img src="{{ society.image.url }}" alt="{{ society.name }}">
                     {% endif %}
                 </div>
                 <span class="soc-card-name">{{ society.name }}</span>
-                <span class="soc-card-stars" style="--rating: {{ society.average_rating|default:'0' }};"></span>
+                <span class="soc-card-stars" style="--rating: {{ society.avg_rating|default:'0' }};"></span>
             </a>
             {% empty %}
             <p class="soc-grid-empty">No societies yet.</p>

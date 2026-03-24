@@ -1,14 +1,64 @@
 {% extends 'rango/base.html' %}
+{% load staticfiles %}
+
 {% block title_block %}Edit Society{% endblock %}
 
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/create_soc.css' %}">{% endblock %}
+
 {% block body_block %}
-<h1>Edit Society: {{ society.name }}</h1>
+<div class="create-society-container">
+    <h1>Edit Society</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Update Society</button>
-</form>
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
 
-<a href="{% url 'rango:society_list' %}">Back to societies list</a>
+        <label for="{{ form.name.id_for_label }}">Society Name</label>
+        <input type="text" id="{{ form.name.id_for_label }}" name="name" value="{{ form.name.value|default_if_none:'' }}" required>
+        {% if form.name.errors %}<div class="field-errors">{{ form.name.errors }}</div>{% endif %}
+
+        <label>Tags</label>
+        <div class="tag-bubbles" id="tags">
+            {% for choice in form.categories %}
+                <label class="tag-bubble">
+                    {{ choice.tag }}
+                    <span>{{ choice.choice_label }}</span>
+                </label>
+            {% endfor %}
+        </div>
+        {% if form.categories.errors %}<div class="field-errors">{{ form.categories.errors }}</div>{% endif %}
+
+        <label for="{{ form.image.id_for_label }}">Society Logo</label>
+        <div class="logo-upload-bar">
+            <input type="file" id="{{ form.image.id_for_label }}" name="image" accept="image/*">
+            <div class="logo-bar-inner">
+                <span class="logo-file-name" id="logo-file-name">
+                    {% if society.image %}{{ society.image.name }}{% else %}Choose a logo file{% endif %}
+                </span>
+                <label class="logo-upload-button" for="{{ form.image.id_for_label }}">Browse</label>
+            </div>
+        </div>
+        {% if form.image.errors %}<div class="field-errors">{{ form.image.errors }}</div>{% endif %}
+
+        <label for="{{ form.description.id_for_label }}">Description</label>
+        <textarea id="{{ form.description.id_for_label }}" name="description" rows="4" required>{{ form.description.value|default_if_none:'' }}</textarea>
+        {% if form.description.errors %}<div class="field-errors">{{ form.description.errors }}</div>{% endif %}
+
+        <button type="submit">Save Changes</button>
+    </form>
+    <a href="{% url 'rango:society_detail' society.pk %}" class="cancel-link">Cancel</a>
+</div>
+
+<script>
+(function() {
+    const input = document.getElementById('{{ form.image.id_for_label }}');
+    const label = document.getElementById('logo-file-name');
+    if (!input || !label) return;
+    input.addEventListener('change', function() {
+        label.textContent = input.files && input.files.length ? input.files[0].name : 'Choose a logo file';
+    });
+})();
+</script>
 {% endblock %}

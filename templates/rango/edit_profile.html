@@ -1,53 +1,80 @@
-<h2>Edit Profile</h2>
+<!DOCTYPE html>
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
+{% block title_block %}Edit Profile{% endblock %}
 
-    <!-- USER FIELDS -->
-    <div>
-        <label>First Name</label><br>
-        <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}">
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/Sign_up.css' %}">{% endblock %}
+
+{% block body_block %}
+
+<div class="page auth-page">
+    <div class="auth-card">
+        <h1>Edit Profile</h1>
+
+        <form method="post" action="{% url 'rango:edit_profile' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-field">
+                <label>First Name</label>
+                <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Last Name</label>
+                <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ form.email.value|default:'' }}">
+            </div>
+
+            <div class="form-field">
+                <label>Bio</label>
+                <textarea name="bio" rows="3">{{ form.bio.value|default:'' }}</textarea>
+            </div>
+
+            <div class="form-field">
+                <label>Profile Picture</label>
+                <div class="upload-choice-row">
+                    <input type="file" name="picture" accept="image/*" id="id_picture">
+                    <div class="upload-bar-inner">
+                        <span class="upload-file-name" id="profile-picture-file-name">No file chosen</span>
+                        <label class="upload-choice-button" for="id_picture">Browse</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <span class="field-label">Account type</span>
+                <div class="role-options">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="STUDENT" {% if form.role.value == "STUDENT" %}checked{% endif %}>
+                        <span>Student</span>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="PRESIDENT" {% if form.role.value == "PRESIDENT" %}checked{% endif %}>
+                        <span>Society President</span>
+                    </label>
+                </div>
+            </div>
+
+            {% if form.errors %}
+            <ul class="errorlist">
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            <div class="auth-actions">
+                <button class="submit-btn" type="submit">Save changes</button>
+                <a href="{% url 'rango:profile' username=request.user.username %}">Cancel</a>
+            </div>
+        </form>
     </div>
-
-    <div>
-        <label>Last Name</label><br>
-        <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}">
-    </div>
-
-    <div>
-        <label>Email</label><br>
-        <input type="email" name="email" value="{{ form.email.value|default:'' }}">
-    </div>
-
-    <hr>
-
-    <!-- PROFILE FIELDS -->
-    <div>
-        <label>Bio</label><br>
-        <textarea name="bio" rows="3">{{ form.bio.value|default:'' }}</textarea>
-    </div>
-
-    <div>
-        <label>Profile Picture</label><br>
-        <input type="file" name="picture">
-    </div>
-
-    <div>
-        <label>Role</label><br>
-        <select name="role">
-            <option value="STUDENT" {% if form.role.value == "STUDENT" %}selected{% endif %}>Student</option>
-            <option value="PRESIDENT" {% if form.role.value == "PRESIDENT" %}selected{% endif %}>President</option>
-        </select>
-    </div>
-
-    <br>
-
-    <!-- ERRORS -->
-    {% if form.errors %}
-        <div style="color:red;">
-            {{ form.errors }}
-        </div>
-    {% endif %}
-
-    <button type="submit">Save</button>
-</form>
+</div>
+{% endblock %}

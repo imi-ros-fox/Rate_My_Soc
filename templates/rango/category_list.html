@@ -1,27 +1,27 @@
-<h1>Categories</h1>
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
 
-<a href="{% url 'rango:create_category' %}">Create Category</a>
+{% block title_block %}Categories{% endblock %}
 
-<hr>
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/Sign_up.css' %}">{% endblock %}
 
-{% for category in categories %}
+{% block body_block %}
 
-<div style="border:1px solid #ddd; padding:15px; margin-bottom:10px">
-
-    <h3>
-        <a href="{% url 'rango:category_detail' category.pk %}">
-            {{ category.name }}
-        </a>
-    </h3>
-
-    <a href="{% url 'rango:edit_category' category.pk %}">Edit</a>
-    |
-    <a href="{% url 'rango:delete_category' category.pk %}">Delete</a>
-
+<div class="page auth-page">
+    <div class="auth-card">
+        <h1>Categories</h1>
+        <a href="{% url 'rango:create_category' %}" class="btn" style="margin-bottom:1rem;">+ Create Category</a>
+        {% for category in categories %}
+        <div class="form-field">
+            <strong><a href="{% url 'rango:category_detail' category.pk %}">{{ category.name }}</a></strong>
+            <div>
+                <a href="{% url 'rango:edit_category' category.pk %}">Edit</a>
+                <a href="{% url 'rango:delete_category' category.pk %}">Delete</a>
+            </div>
+        </div>
+        {% empty %}
+        <p>No categories yet.</p>
+        {% endfor %}
+    </div>
 </div>
-
-{% empty %}
-
-<p>No categories yet.</p>
-
-{% endfor %}
+{% endblock %}
