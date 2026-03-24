@@ -35,7 +35,7 @@ def index(request):
         'categories': categories,
     }
 
-    response = render(request, 'rango/index.html', context=context_dict)
+    response = render(request, 'rango/home/index.html', context=context_dict)
     return response
 
 def about(request):
@@ -68,7 +68,7 @@ def register(request):
             password = user_form.cleaned_data.get('password')
             if len(password) < 8:
                 messages.error(request, 'Password must be at least 8 characters long')
-                return render(request, 'rango/register.html', {
+                return render(request, 'rango/authentication/register.html', {
                     'user_form': user_form,
                     'profile_form': profile_form,
                     'registered': registered
@@ -107,7 +107,7 @@ def register(request):
         user_form = UserForm()
         profile_form = UserProfileForm()
 
-    return render(request, 'rango/register.html', {
+    return render(request, 'rango/authentication/register.html', {
         'user_form': user_form,
         'profile_form': profile_form,
         'registered': registered
@@ -154,7 +154,7 @@ def user_login(request):
             print(f"Invalid login details: {username}, {password}")
             return HttpResponse("Invalid login details supplied.")
     else:
-        return render(request, 'rango/login.html')
+        return render(request, 'rango/authentication/login.html')
 
 #Created a new profile view
 @login_required
@@ -183,7 +183,7 @@ def profile_view(request, username):
         'upvotes': upvotes,
     }
 
-    return render(request, 'rango/profile.html', context)
+    return render(request, 'rango/profile/profile.html', context)
 
 #Created a new edit profile view
 from .forms import EditProfileForm
@@ -209,7 +209,7 @@ def edit_profile(request):
     else:
         form = EditProfileForm(instance=profile, user=request.user)
 
-    return render(request, 'rango/edit_profile.html', {'form': form})
+    return render(request, 'rango/profile/edit_profile.html', {'form': form})
 #Created a delete profile view
 
 @login_required
@@ -227,7 +227,7 @@ def delete_profile(request):
         user.delete()
         messages.success(request, 'Account has been deleted.')
         return redirect('rango:index')
-    return render(request, 'rango/delete_profile.html')
+    return render(request, 'rango/profile/delete_profile.html')
 
 @login_required
 def restricted(request):
@@ -291,7 +291,7 @@ def create_soc(request):
 @login_required
 def society_list(request):
     societies = Society.objects.all()
-    return render(request, 'rango/society_list.html', {'societies': societies})
+    return render(request, 'rango/society/society_list.html', {'societies': societies})
 
 @login_required
 def create_society(request):
@@ -311,7 +311,7 @@ def create_society(request):
             return redirect('rango:index')
     else:
         form = SocietyForm()
-    return render(request, 'rango/create_soc.html', {'form': form})
+    return render(request, 'rango/society/create_soc.html', {'form': form})
 
 @login_required
 def edit_society(request, pk):
@@ -329,7 +329,7 @@ def edit_society(request, pk):
             return redirect('rango:society_list')
     else:
         form = SocietyForm(instance=society)
-    return render(request, 'rango/edit_society.html', {'form': form, 'society': society})
+    return render(request, 'rango/society/edit_society.html', {'form': form, 'society': society})
 
 @login_required
 def delete_society(request, pk):
@@ -344,7 +344,7 @@ def delete_society(request, pk):
         messages.success(request, 'Society deleted successfully!')
         return redirect('rango:society_list')
 
-    return render(request, 'rango/delete_society.html', {'society': society})
+    return render(request, 'rango/society/delete_society.html', {'society': society})
 
 @login_required
 def category_list(request):
@@ -426,7 +426,7 @@ def society_detail(request, pk):
         'review_form': review_form,
         'range_5': range_5,
     }
-    return render(request, 'rango/society_detail.html', context)
+    return render(request, 'rango/society/society_detail.html', context)
 
 
 @login_required
@@ -486,7 +486,7 @@ def search_societies(request):
         'query': query,
         'results': results
     }
-    return render(request, 'rango/search_results.html', context)
+    return render(request, 'rango/home/search_results.html', context)
 
 def top_rated_societies(request):
     N = 5
