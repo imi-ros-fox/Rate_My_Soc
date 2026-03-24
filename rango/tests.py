@@ -346,7 +346,7 @@ class IndexViewTests(TestCase):
     def test_index_view_uses_correct_template(self):
         """Test that index view uses the correct template."""
         response = self.client.get(reverse('rango:index'))
-        self.assertTemplateUsed(response, 'rango/index.html')  
+        self.assertTemplateUsed(response, 'rango/home/index.html')  
 
     def test_index_view_context(self):
         #Test that index view passes correct context variables.
@@ -413,7 +413,7 @@ class RegistrationViewTests(TestCase):
     def test_register_view_uses_correct_template(self):
         #Test that registration view uses the correct template.
         response = self.client.get(reverse('rango:register'))
-        self.assertTemplateUsed(response, 'rango/register.html')
+        self.assertTemplateUsed(response, 'rango/authentication/register.html')
     
     def test_register_valid_user(self):
         #Test successful user registration.
@@ -466,7 +466,7 @@ class LoginViewTests(TestCase):
     def test_login_view_uses_correct_template(self):
         #Test that login view uses the correct template.
         response = self.client.get(reverse('rango:login'))
-        self.assertTemplateUsed(response, 'rango/login.html')
+        self.assertTemplateUsed(response, 'rango/authentication/login.html')
     
     def test_login_valid_credentials(self):
         #Test successful login with valid credentials.
@@ -529,7 +529,7 @@ class ProfileViewTests(TestCase):
     def test_profile_view_uses_correct_template(self):
         #Test that profile view uses the correct template.
         response = self.client.get(reverse('rango:profile', kwargs={'username': 'testuser'}))
-        self.assertTemplateUsed(response, 'rango/profile.html')
+        self.assertTemplateUsed(response, 'rango/profile/profile.html')
     
     def test_profile_view_context(self):
         #Test that profile view passes correct context.
@@ -558,7 +558,7 @@ class EditProfileViewTests(TestCase):
     def test_edit_profile_view_uses_correct_template(self):
         #Test that edit profile view uses the correct template.
         response = self.client.get(reverse('rango:edit_profile'))
-        self.assertTemplateUsed(response, 'rango/edit_profile.html')
+        self.assertTemplateUsed(response, 'rango/profile/edit_profile.html')
     
     def test_edit_profile_valid_data(self):
         #Test successful profile update.
