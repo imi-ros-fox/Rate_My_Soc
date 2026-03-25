@@ -528,7 +528,7 @@ def edit_review(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, "Review updated")
-            return redirect('rango:my_reviews')
+            return redirect('rango:society_detail', pk=review.society.pk)
     else:
         form = ReviewForm(instance=review)
 
@@ -540,11 +540,10 @@ def edit_review(request, pk):
 @login_required
 def delete_review(request, pk):
     review = get_object_or_404(Review, pk=pk, user=request.user)
-
     if request.method == 'POST':
         review.delete()
         messages.success(request, "Review deleted")
-        return redirect('rango:my_reviews')
+        return redirect('rango:society_detail', pk=review.society.pk)
 
     return render(request, 'rango/society/delete_review.html', {
         'review': review
@@ -561,11 +560,8 @@ def my_upvotes(request):
 @login_required
 def delete_upvote(request, pk):
     upvote = get_object_or_404(Upvote, pk=pk, user=request.user)
-
-    if request.method == 'POST':
-        upvote.delete()
-        messages.success(request, "Upvote removed")
-        return redirect('rango:my_upvotes')
-
-    return render(request, 'rango/society/delete_upvote.html', {'upvote': upvote})
+    society_pk = upvote.review.society.pk
+    upvote.delete()
+    messages.success(request, "Upvote removed")
+    return redirect('rango:society_detail', pk=society_pk)
 

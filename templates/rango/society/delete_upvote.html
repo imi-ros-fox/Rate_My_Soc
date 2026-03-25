@@ -9,4 +9,4 @@
     <button type="submit">Yes, remove upvote</button>
 </form>
 
-<a href="{% url 'rango:my_upvotes' %}">Cancel</a>
+<a href="{% url 'rango:society_detail' upvote.review.society.pk %}">Cancel</a>
