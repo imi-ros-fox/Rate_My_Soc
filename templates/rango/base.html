@@ -10,7 +10,8 @@
         {% block extra_css %}{% endblock %}
     </head>
     <body>
-        {% if messages %}
+        <!-- Django messages disabled - AJAX operations update silently -->
+        <!-- {% if messages %}
           <div class="messages">
             {% for message in messages %}
               <div class="alert
@@ -19,11 +20,20 @@
               </div>
             {% endfor %}
           </div>
-        {% endif %}
+        {% endif %} -->
         {% include 'rango/header.html' %}
         <div class="page-main">
             {% block body_block %}
             {% endblock %}
         </div>
+        
+        <!-- jQuery Library -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        
+        <!-- AJAX Handlers -->
+        <script src="{% static 'js/ajax_handlers.js' %}"></script>
+        
+        <!-- Additional JS -->
+        <script src="{% static 'js/ui_animations.js' %}"></script>
     </body>
 </html>
