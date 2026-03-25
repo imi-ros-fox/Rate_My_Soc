@@ -1,0 +1,70 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+
+{% block title_block %}
+    About
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block body_block %}
+
+<div class="about-page">
+
+    <section class="about-hero">
+        <h1>About Rate My Society</h1>
+        <p>A platform for students to discover, review, and rate university societies.</p>
+    </section>
+
+    <section class="about-section">
+        <h2>Our Mission</h2>
+        <p>
+            Our goal is to help students make informed decisions when joining societies.
+            We provide honest reviews and ratings from real students.
+        </p>
+    </section>
+
+    <section class="about-section">
+        <h2>What You Can Do</h2>
+        <ul>
+            <li>Browse and search societies</li>
+            <li>Leave ratings and reviews</li>
+            <li>Upvote helpful reviews</li>
+            <li>Create and manage societies (for presidents)</li>
+        </ul>
+    </section>
+
+    <section class="about-section stats">
+        <h2>Platform Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>{{ total_users }}</h3>
+                <p>Users</p>
+            </div>
+            <div class="stat-box">
+                <h3>{{ total_societies }}</h3>
+                <p>Societies</p>
+            </div>
+            <div class="stat-box">
+                <h3>{{ visits }}</h3>
+                <p>Visits</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section">
+        <h2>Top Societies</h2>
+        <ul>
+            {% for soc in top_societies %}
+                <li>{{ soc.name }}</li>
+            {% empty %}
+                <li>No societies available</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+</div>
+
+{% endblock %}
