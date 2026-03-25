@@ -3,7 +3,7 @@ from urllib import response
 
 from django.contrib.auth.models import User
 from django.db.models import Avg, Q, Count
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
@@ -455,6 +455,18 @@ def rate_society(request, pk):
             if not created:
                 rating.star = star
                 rating.save()
+        
+        # Check if AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
+            total_ratings = Rating.objects.filter(society=society).count()
+            return JsonResponse({
+                'success': True,
+                'avg_rating': round(avg_rating, 1) if avg_rating else 0,
+                'total_ratings': total_ratings,
+                'rating': star
+            })
+        
         return redirect('rango:society_detail', pk=society.pk)
     return redirect('rango:society_detail', pk=society.pk)
 
@@ -463,25 +475,66 @@ def add_review(request, pk):
     society = get_object_or_404(Society, pk=pk)
     if request.method == 'POST':
         if Review.objects.filter(user=request.user, society=society).exists():
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': "You have already written a review for this society."
+                })
             messages.error(request, "You have already written a review for this society.")
             return redirect('rango:society_detail', pk=pk)
+        
         form = ReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
             review.user = request.user
             review.society = society
             review.save()
+            
+            # Check if AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                avg_rating = Rating.objects.filter(society=society).aggregate(Avg('star'))['star__avg']
+                total_ratings = Rating.objects.filter(society=society).count()
+                return JsonResponse({
+                    'success': True,
+                    'review': {
+                        'id': review.id,
+                        'username': review.user.username,
+                        'comment': review.comment,
+                        'created_at': review.created_at.strftime('%Y-%m-%d %H:%M'),
+                        'upvotes': 0
+                    },
+                    'avg_rating': round(avg_rating, 1) if avg_rating else 0,
+                    'total_ratings': total_ratings
+                })
+        else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Invalid form data'
+                })
+    
     return redirect('rango:society_detail', pk=pk)
 
 @login_required
 def upvote_review(request, review_id):
     review = get_object_or_404(Review, id=review_id)
-    upvote, created = Upvote.objects.get_or_create(
-        user=request.user,
-        review=review
-    )
-    if not created:
-        upvote.delete()  # toggle like
+    
+    if request.method == 'POST':
+        upvote, created = Upvote.objects.get_or_create(
+            user=request.user,
+            review=review
+        )
+        if not created:
+            upvote.delete()  # toggle like
+        
+        # Check if AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            total_upvotes = Upvote.objects.filter(review=review).count()
+            return JsonResponse({
+                'success': True,
+                'total_upvotes': total_upvotes
+            })
+    
     return redirect('rango:society_detail', pk=review.society.pk)
 
 def search_societies(request):
