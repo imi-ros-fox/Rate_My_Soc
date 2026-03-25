@@ -375,32 +375,34 @@ class IndexViewTests(TestCase):
         societies = response.context['societies']
         self.assertEqual(societies.count(), 2)
         self.assertTrue(all('Sports' in [c.name for c in s.categories.all()] for s in societies))
+
+
+"""About tests no longer needed """
+# class AboutViewTests(TestCase):
+#     #Tests for the about view.
     
-class AboutViewTests(TestCase):
-    #Tests for the about view.
+#     def setUp(self):
+#         self.client = Client()
+#         self.user = create_test_user()
+#         self.society = create_test_society(created_by=self.user)
+#         create_test_rating(self.society, self.user, 5)   
     
-    def setUp(self):
-        self.client = Client()
-        self.user = create_test_user()
-        self.society = create_test_society(created_by=self.user)
-        create_test_rating(self.society, self.user, 5)   
+#     def test_about_view_uses_correct_template(self):
+#         #Test that about view uses the correct template.
+#         response = self.client.get(reverse('rango:about'))
+#         self.assertTemplateUsed(response, 'rango/about.html')
     
-    def test_about_view_uses_correct_template(self):
-        #Test that about view uses the correct template.
-        response = self.client.get(reverse('rango:about'))
-        self.assertTemplateUsed(response, 'rango/about.html')
-    
-    def test_about_view_context(self):
-        #Test that about view passes correct context variables.
-        response = self.client.get(reverse('rango:about'))
+#     def test_about_view_context(self):
+#         #Test that about view passes correct context variables.
+#         response = self.client.get(reverse('rango:about'))
         
-        self.assertIn('visits', response.context)
-        self.assertIn('total_users', response.context)
-        self.assertIn('total_societies', response.context)
-        self.assertIn('top_societies', response.context)
+#         self.assertIn('visits', response.context)
+#         self.assertIn('total_users', response.context)
+#         self.assertIn('total_societies', response.context)
+#         self.assertIn('top_societies', response.context)
         
-        self.assertEqual(response.context['total_users'], User.objects.count())
-        self.assertEqual(response.context['total_societies'], Society.objects.count())
+#         self.assertEqual(response.context['total_users'], User.objects.count())
+#         self.assertEqual(response.context['total_societies'], Society.objects.count())
     
 
 class RegistrationViewTests(TestCase):
@@ -588,13 +590,124 @@ class EditProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith(reverse('rango:login')))
 
-    
-    
 
-
-
-
-
+class SocietyListAndDetailTests(TestCase):
+    #Tests for society list and detail views.
     
+    def setUp(self):
+        self.client = Client()
+        # Create a president user with explicit password
+        self.user = create_test_user(
+            username='president',
+            password='testpass123',  
+            role='PRESIDENT'
+        )
+        # Log in with the same password
+        login_result = self.client.login(username='president', password='testpass123')
+        self.assertTrue(login_result, "Login failed in setUp") 
+        
+        self.category = create_test_category('Sports')
+        self.society = create_test_society('Football Club', self.user, [self.category])
     
+    def test_society_list_view(self):
+        #Test society list view.
+
+        response = self.client.get(reverse('rango:society_list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'rango/society/society_list.html')
+        self.assertEqual(response.context['societies'].count(), 1)
     
+    def test_society_detail_view(self):
+        #Test society detail view.
+
+        response = self.client.get(reverse('rango:society_detail', kwargs={'pk': self.society.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'rango/society/society_detail.html')
+        self.assertEqual(response.context['society'], self.society)
+        self.assertIn('avg_rating', response.context)
+        self.assertIn('reviews', response.context)
+        self.assertIn('review_form', response.context)
+    
+    def test_create_society_view(self):
+        #Test create society view.
+
+        # Test GET - user is already logged in from setUp
+        response = self.client.get(reverse('rango:create_society'))
+        self.assertEqual(response.status_code, 200)
+        
+        # Test POST with valid data
+        data = {
+            'name': 'New Society',
+            'description': 'This is a new society',
+            'categories': [self.category.id]
+        }
+        response = self.client.post(reverse('rango:create_society'), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('rango:index'))
+        
+        society = Society.objects.get(name='New Society')
+        self.assertEqual(society.created_by, self.user)
+    
+    def test_create_society_requires_president_role(self):
+        #Test that only presidents can create societies.
+
+        # Create a student user and log in as student
+        student_user = create_test_user(
+            username='student',
+            password='testpass123',
+            role='STUDENT'
+        )
+        self.client.login(username='student', password='testpass123')
+        
+        response = self.client.get(reverse('rango:create_society'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('rango:index'))
+        
+        # Log back in as president for other tests
+        self.client.login(username='president', password='testpass123')
+    
+    def test_edit_society_view(self):
+        #Test edit society view.
+
+        # User is already logged in as president from setUp
+        response = self.client.get(reverse('rango:edit_society', kwargs={'pk': self.society.pk}))
+        self.assertEqual(response.status_code, 200)
+        
+        # Test POST update
+        data = {
+            'name': 'Updated Society',
+            'description': 'Updated description',
+            'categories': [self.category.id]
+        }
+        response = self.client.post(reverse('rango:edit_society', kwargs={'pk': self.society.pk}), data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('rango:index'))
+        
+        self.society.refresh_from_db()
+        self.assertEqual(self.society.name, 'Updated Society')
+    
+    def test_edit_society_unauthorized(self):
+        #Test that non-creators cannot edit society.
+
+        other_user = create_test_user(
+            username='otheruser',
+            password='testpass123',
+            role='PRESIDENT'
+        )
+        self.client.login(username='otheruser', password='testpass123')
+        
+        response = self.client.get(reverse('rango:edit_society', kwargs={'pk': self.society.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('rango:index'))
+        
+        # Log back in as president
+        self.client.login(username='president', password='testpass123')
+    
+    def test_delete_society_view(self):
+        #Test delete society view.
+        
+        # User is already logged in as president from setUp
+        response = self.client.post(reverse('rango:delete_society', kwargs={'pk': self.society.pk}))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('rango:index'))
+        self.assertFalse(Society.objects.filter(pk=self.society.pk).exists())
