@@ -26,6 +26,7 @@ urlpatterns = [
     path('societies/<int:pk>/review/', views.add_review, name='add_review'),
     path('reviews/<int:review_id>/upvote/', views.upvote_review, name='upvote_review'),
     path('search/', views.search_societies, name='search_societies'),
+    path('about/', views.about, name='about'),
     # path('societies/top/', views.top_rated_societies, name='top_societies'),
 
     #Category CRUD

@@ -618,3 +618,16 @@ def delete_upvote(request, pk):
     messages.success(request, "Upvote removed")
     return redirect('rango:society_detail', pk=society_pk)
 
+def about(request):
+    visits = request.session.get('visits', 0)
+    visits += 1
+    request.session['visits'] = visits
+
+    context_dict = {
+        'visits': visits,
+        'total_users': User.objects.count(),
+        'total_societies': Society.objects.count(),
+        'top_societies': Society.objects.all()[:5],
+    }
+
+    return render(request, 'rango/home/about.html', context=context_dict)
