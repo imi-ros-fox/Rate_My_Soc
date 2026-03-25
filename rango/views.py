@@ -34,7 +34,7 @@ def index(request):
 
     top_societies = Society.objects.annotate(
         avg_rating=Avg('rating__star')
-    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
+    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:3]
 
     categories = Category.objects.all()
 
