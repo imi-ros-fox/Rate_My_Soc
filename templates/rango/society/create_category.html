@@ -1,0 +1,28 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %}
+{% block title_block %} 
+    Create Category
+{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/Sign_in.css' %}">{% endblock %}
+
+{% block body_block %}
+<div class="page auth-page">
+    <div class="auth-card">
+        <h2>Create Category</h2>
+
+        <form method="post">
+
+        {% csrf_token %}
+
+        {{ form.as_p }}
+        <div class="auth-actions">
+            <button class="submit-btn" type="submit">Create Tag</button>
+            <a href="{% url 'rango:create_society' %}">Back to Create Society</a>
+
+        
+
+        </form>
+    </div>
+</div>
+{% endblock %}

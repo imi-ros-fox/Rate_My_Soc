@@ -34,7 +34,7 @@ def index(request):
 
     top_societies = Society.objects.annotate(
         avg_rating=Avg('rating__star')
-    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:8]
+    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:5]
 
     categories = Category.objects.all()
 
@@ -379,12 +379,12 @@ def create_category(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Category created successfully!')
-            return redirect('rango:category_list')
+            return redirect('rango:create_society')
 
     else:
         form = CategoryForm()
 
-    return render(request, 'rango/create_category.html', {'form': form})
+    return render(request, 'rango/society/create_category.html', {'form': form})
 
 @login_required
 def edit_category(request, pk):

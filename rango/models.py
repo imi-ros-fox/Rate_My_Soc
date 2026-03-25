@@ -83,7 +83,7 @@ def save_user_profile(sender, instance, **kwargs):
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     society = models.ForeignKey(Society, on_delete=models.CASCADE)
-    comment = models.TextField(blank=True)
+    comment = models.TextField(blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -55,6 +55,9 @@
     color: #000000;
     text-align: right;
     margin-left: auto;
-
-
 }
+.add-category a {
+    padding : 0.4rem 0.75rem;
+    font-size: 0.9rem;  
+}
+
