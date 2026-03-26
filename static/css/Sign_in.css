@@ -8,9 +8,8 @@
 .auth-card {
     width: min(420px, 100%);
     padding: 1.5rem;
-    border: 1px solid #d7d7d7;
     border-radius: 12px;
-    background: #d2eaff;
+    background: #c7d8ff;
 }
 
 .auth-card h1 {
@@ -31,7 +30,7 @@
     padding: 0.9rem 1rem;
     border: 0;
     border-radius: 8px;
-    background: #add9ff;
+    background: #b0c9ff;
     box-sizing: border-box;
 }
 .auth-actions {
@@ -45,14 +44,14 @@
     width: fit-content;
     padding: 0.6rem 1rem;
     border-radius: 8px;
-    background: #000000;
+    background: #1b4ca8;
     color: #ffffff;
 }
 
 
 
 .auth-card a{
-    color: #000000;
+    color: #0f1c38;;
     text-align: right;
     margin-left: auto;
 }

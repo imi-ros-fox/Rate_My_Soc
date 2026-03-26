@@ -46,8 +46,8 @@
                     </label>
                 {% endfor %}
             {% endif %}
+            <a  href="{% url 'rango:create_category' %}">+ Add category</a>
         </div>
-            <a href="{% url 'rango:create_category' %}" class="add-category-link">+ Add category</a>
         {% if form and form.categories.errors %}
             <div class="field-errors">{{ form.categories.errors }}</div>
         {% endif %}

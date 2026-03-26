@@ -104,6 +104,7 @@
 
 .soc-sort-dropdown {
     position: relative;
+    z-index: 10;
 }
 
 .soc-sort-btn {
@@ -189,6 +190,7 @@
 .soc-card:hover {
     background: #b0c9ff;
     transform: translateY(-2px);
+    z-index: 1;
 }
 
 .soc-card-logo {

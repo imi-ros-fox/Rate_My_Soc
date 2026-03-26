@@ -3,7 +3,7 @@
     margin: auto;
     padding: 1.5rem;
     border-radius: 12px;
-    background: #d2eaff;
+    background: #c7d8ff;
 }
 
 .create-society-container h1 {
@@ -15,6 +15,13 @@
     display: block;
     margin-top: 1rem;
     font-weight: bold;
+}
+
+.create-society-container .tag-bubble {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 0;
+    font-weight: normal;
 }
 
 .form-errors,
@@ -36,25 +43,42 @@
     padding: 0.75rem;
     border-radius: 8px;
     border: 0;
-    background: #add9ff;
+    background: #b0c9ff;
 }
 
 .tag-bubbles {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.6rem;
     margin-top: 0.75rem;
 }
 
 .tag-bubble {
+    display: inline-flex;
+    align-items: center;
     margin-top: 0;
     font-weight: normal;
 }
 
-.tag-bubble input {
+.tag-bubbles a {
+    display: block;
+    background: #102a3d;
+    color: #e9f6ff;
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    text-decoration: none;
+}
+
+.tag-bubbles a:hover {
+    background: #1b4ca8;
+}
+
+.tag-bubble input, .tag-bubble a {
     position: absolute;
     opacity: 0;
     pointer-events: none;
+  
 }
 
 .tag-bubble span {
@@ -62,11 +86,11 @@
     padding: 0.45rem 0.9rem;
     border-radius: 999px;
     background: #e9f6ff;
-    color: #0f2a3d;
+    color: #000000;
 }
 
 .tag-bubble input:checked + span {
-    background: #0f2a3d;
+    background: #000000;
     color: #ffffff;
 }
 
@@ -75,7 +99,7 @@
     margin-top: 0.5rem;
     border-radius: 8px;
     border: 0;
-    background: #add9ff;
+    background: #b0c9ff;
 }
 
 .logo-upload-bar input[type="file"] {
@@ -116,7 +140,7 @@
 .create-society-container button[type="submit"] {
     margin-top: 1.5rem;
     width: 100%;
-    background: #000000;
+    background: #1b4ca8;
     color: #ffffff;
     padding: 0.75rem;
     border: none;

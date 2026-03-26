@@ -1,23 +1,32 @@
 {% extends 'rango/base.html' %}
-{% block title_block %}
-Search Results
-{% endblock %}
+{% load staticfiles %}
+{% block title_block %}Search Results{% endblock %}
+
+{% block extra_css %}<link rel="stylesheet" type="text/css" href="{% static 'css/home_page.css' %}">{% endblock %}
+
 {% block body_block %}
-<h2>Search Results</h2>
-{% if query %}
-<p>Results for "<strong>{{ query }}</strong>"</p>
-{% endif %}
-{% if results %}
-<ul>
-{% for society in results %}
-<li>
-<a href="{% url 'rango:society_detail' society.pk %}">
-    {{ society.name }}
-</a>
-</li>
-{% endfor %}
-</ul>
-{% else %}
-<p>No societies found.</p>
-{% endif %}
+<div style="padding: 1.5rem 1.25rem;">
+    <div class="soc-main-header">
+        <h2 class="soc-main-title">
+            {% if query %}Results for "<strong>{{ query }}</strong>"{% else %}Search Results{% endif %}
+        </h2>
+    </div>
+    {% if results %}
+    <div class="soc-grid">
+        {% for society in results %}
+        <a href="{% url 'rango:society_detail' society.pk %}" class="soc-card">
+            <div class="soc-card-logo">
+                {% if society.image %}
+                    <img src="{{ society.image.url }}" alt="{{ society.name }}">
+                {% endif %}
+            </div>
+            <span class="soc-card-name">{{ society.name }}</span>
+            <span class="soc-card-stars" style="--rating: {{ society.avg_rating|default:'0' }};"></span>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="soc-grid-empty">No societies found.</p>
+    {% endif %}
+</div>
 {% endblock %}
