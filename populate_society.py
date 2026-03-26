@@ -1,7 +1,7 @@
 import os
 
 from django import views
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tango_with_django_project.settings')   
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rate_my_soc_project.settings')
 
 import django
 
