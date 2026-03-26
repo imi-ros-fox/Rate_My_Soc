@@ -48,27 +48,9 @@ def index(request):
     response = render(request, 'rango/home/index.html', context=context_dict)
     return response
 
-def about(request):
-    visitor_cookie_handler(request)
-    total_users = User.objects.count()
-    total_societies = Society.objects.count()
-    # Top 3
-    top_societies = Society.objects.annotate(
-        avg_rating=Avg('rating__star')
-    ).filter(avg_rating__isnull=False).order_by('-avg_rating')[:3]
-
-    context_dict = {
-        'visits': request.session['visits'],
-        'total_users': total_users,
-        'total_societies': total_societies,
-        'top_societies': top_societies,
-    }
-
-    return render(request, 'rango/about.html', context=context_dict)
 
 def register(request):
     registered = False
-
     if request.method == 'POST':
         user_form = UserForm(request.POST)
         profile_form = UserProfileForm(request.POST, request.FILES)
@@ -146,7 +128,7 @@ def user_login(request):
                 #Checks to see whether user is student or president
                 try:
                     request.session['user_role'] = user.userprofile.role
-                except UserProfileForm.DoesNotExist:
+                except UserProfile.DoesNotExist:
                     UserProfile.objects.create(user=user)
                     request.session['user_role'] = 'STUDENT'
                 
@@ -161,8 +143,8 @@ def user_login(request):
             else:
                 return HttpResponse("Your Rate my Society account is disabled.")
         else:
-            print(f"Invalid login details: {username}, {password}")
-            return HttpResponse("Invalid login details supplied.")
+            return render(request, 'rango/authentication/login.html')
+            messages.error(request, "Invalid login details supplied.")
     else:
         return render(request, 'rango/authentication/login.html')
 
