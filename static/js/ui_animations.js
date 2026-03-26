@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Fade in the main content on page load
     const mainContent = document.querySelector('main') || document.body;
     mainContent.style.opacity = '0';
