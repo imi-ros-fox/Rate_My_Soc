@@ -31,7 +31,7 @@ urlpatterns = [
 
     #Category CRUD
     # path('categories/', views.category_list, name='category_list'),
-    # path('categories/create/', views.create_category, name='create_category'),
+    path('categories/create/', views.create_category, name='create_category'),
     # path('categories/<int:pk>/', views.category_detail, name='category_detail'),
     # path('categories/<int:pk>/edit/', views.edit_category, name='edit_category'),
     # path('categories/<int:pk>/delete/', views.delete_category, name='delete_category'),

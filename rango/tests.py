@@ -320,9 +320,9 @@ class FormTests(TestCase):
         form = ReviewForm(data=valid_data)
         self.assertTrue(form.is_valid())
         
-        # Test empty comment (allowed)
+        # Test empty comment (not allowed) as reviews and ratings are sperate this should not work
         form = ReviewForm(data={'comment': ''})
-        self.assertTrue(form.is_valid())
+        self.assertFalse(form.is_valid())
         
         
 #Views Tests
@@ -378,31 +378,31 @@ class IndexViewTests(TestCase):
 
 
 """About tests no longer needed """
-# class AboutViewTests(TestCase):
-#     #Tests for the about view.
+class AboutViewTests(TestCase):
+         #Tests for the about view.
     
-#     def setUp(self):
-#         self.client = Client()
-#         self.user = create_test_user()
-#         self.society = create_test_society(created_by=self.user)
-#         create_test_rating(self.society, self.user, 5)   
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user()
+        self.society = create_test_society(created_by=self.user)
+        create_test_rating(self.society, self.user, 5)   
     
-#     def test_about_view_uses_correct_template(self):
-#         #Test that about view uses the correct template.
-#         response = self.client.get(reverse('rango:about'))
-#         self.assertTemplateUsed(response, 'rango/about.html')
+    def test_about_view_uses_correct_template(self):
+        #Test that about view uses the correct template.
+        response = self.client.get(reverse('rango:about'))
+        self.assertTemplateUsed(response, 'rango/home/about.html')
     
-#     def test_about_view_context(self):
-#         #Test that about view passes correct context variables.
-#         response = self.client.get(reverse('rango:about'))
+    def test_about_view_context(self):
+        #Test that about view passes correct context variables.
+        response = self.client.get(reverse('rango:about'))
         
-#         self.assertIn('visits', response.context)
-#         self.assertIn('total_users', response.context)
-#         self.assertIn('total_societies', response.context)
-#         self.assertIn('top_societies', response.context)
+        self.assertIn('visits', response.context)
+        self.assertIn('total_users', response.context)
+        self.assertIn('total_societies', response.context)
+        self.assertIn('top_societies', response.context)
         
-#         self.assertEqual(response.context['total_users'], User.objects.count())
-#         self.assertEqual(response.context['total_societies'], Society.objects.count())
+        self.assertEqual(response.context['total_users'], User.objects.count())
+        self.assertEqual(response.context['total_societies'], Society.objects.count())
     
 
 class RegistrationViewTests(TestCase):
