@@ -41,3 +41,10 @@
     overflow: hidden;
     white-space: nowrap;
 }
+.site-footer {
+    background-color: white;
+    color: black;
+    padding: 20px;
+    text-align: center;
+    margin-top: 40px;
+}
