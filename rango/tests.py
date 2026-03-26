@@ -45,7 +45,7 @@ def create_test_category(name='Test Category'):
 
 
 def create_test_review(society, user, comment='Test review'):
-    #Helper function to create a test review.
+    #Helper function to create a test review
     return Review.objects.create(
         society=society,
         user=user,
@@ -66,7 +66,7 @@ def create_test_rating(society, user, star=5):
 #Model Tests
 
 class ModelTests(TestCase):
-    #Tests for all models in the Rate My Society application.
+    #Tests for all models in Rate My Society
     
     def setUp(self):
         self.user = create_test_user()
@@ -90,7 +90,7 @@ class ModelTests(TestCase):
         
     
     def test_user_profile_model(self):
-        #Test UserProfile model attributes and methods.
+        #Test UserProfile model attributes and methods
         profile = self.user.userprofile
         
         # Test string representation
@@ -111,7 +111,7 @@ class ModelTests(TestCase):
         self.assertEqual(president_user.userprofile.role, 'PRESIDENT')
     
     def test_society_model(self):
-        # Test Society model attributes and methods.
+        # Test Society model attributes and methods
 
         # Test string representation
         self.assertEqual(str(self.society), 'Test Society')
@@ -133,7 +133,7 @@ class ModelTests(TestCase):
         self.assertEqual(Society._meta.verbose_name_plural, 'Societies')
     
     def test_review_model(self):
-        #Test Review model attributes and methods.
+        #Test Review model attributes and methods
 
         review = create_test_review(self.society, self.user)
         
@@ -153,7 +153,7 @@ class ModelTests(TestCase):
 #Form tests
 
 class FormTests(TestCase):
-    #Tests for all forms in the Rate My Society application.
+    #Tests for all forms in Rate My Society 
     
     def setUp(self):
         self.user = create_test_user()
@@ -253,7 +253,7 @@ class FormTests(TestCase):
             self.assertEqual(profile.bio, 'Updated bio')
     
     def test_society_form(self):
-        #Test SocietyForm validation and field configuration.
+        #Test SocietyForm validation and field configuration
 
         valid_data = {
             'name': 'New Society',
@@ -274,7 +274,7 @@ class FormTests(TestCase):
         
     
     def test_category_form(self):
-        #Test CategoryForm validation.
+        #Test CategoryForm validation
 
         valid_data = {'name': 'New Category'}
         form = CategoryForm(data=valid_data)
@@ -289,7 +289,7 @@ class FormTests(TestCase):
         self.assertFalse(form.is_valid())
     
     def test_rating_form(self):
-        # Test RatingForm validation.
+        # Test RatingForm validation
 
         # Test valid stars 1-5
         for star in range(1, 6):
@@ -312,7 +312,7 @@ class FormTests(TestCase):
         self.assertEqual(form.cleaned_data['star'], 3)
     
     def test_review_form(self):
-        #Test ReviewForm validation.
+        #Test ReviewForm validation
 
 
         # Test valid review
@@ -320,7 +320,7 @@ class FormTests(TestCase):
         form = ReviewForm(data=valid_data)
         self.assertTrue(form.is_valid())
         
-        # Test empty comment (not allowed) as reviews and ratings are sperate this should not work
+        # Test empty comment (not allowed) as reviews and ratings are sperate
         form = ReviewForm(data={'comment': ''})
         self.assertFalse(form.is_valid())
         
@@ -329,7 +329,7 @@ class FormTests(TestCase):
 
 
 class IndexViewTests(TestCase):
-    #Tests for the index view.
+    #Tests for the index view
     
     def setUp(self):
         self.client = Client()
@@ -344,12 +344,14 @@ class IndexViewTests(TestCase):
         create_test_rating(self.society1, other_user, 4)
 
     def test_index_view_uses_correct_template(self):
-        """Test that index view uses the correct template."""
+        #Test that index view uses the correct template
+
         response = self.client.get(reverse('rango:index'))
         self.assertTemplateUsed(response, 'rango/home/index.html')  
 
     def test_index_view_context(self):
-        #Test that index view passes correct context variables.
+        #Test that index view passes correct context variables
+
         response = self.client.get(reverse('rango:index'))
         
         self.assertIn('societies', response.context)
@@ -365,7 +367,8 @@ class IndexViewTests(TestCase):
         self.assertEqual(categories.count(), 1)
 
     def test_index_category_filter(self):
-        #Test filtering societies by category.
+        #Test filtering societies by category
+
         # Create another category and society
         another_category = create_test_category('Music')
         create_test_society('Choir', self.user, [another_category])
@@ -379,7 +382,7 @@ class IndexViewTests(TestCase):
 
 """About tests no longer needed """
 class AboutViewTests(TestCase):
-         #Tests for the about view.
+     #Tests for the about view.
     
     def setUp(self):
         self.client = Client()
@@ -388,7 +391,7 @@ class AboutViewTests(TestCase):
         create_test_rating(self.society, self.user, 5)   
     
     def test_about_view_uses_correct_template(self):
-        #Test that about view uses the correct template.
+        #Test that about view uses the correct template
         response = self.client.get(reverse('rango:about'))
         self.assertTemplateUsed(response, 'rango/home/about.html')
     
@@ -406,19 +409,19 @@ class AboutViewTests(TestCase):
     
 
 class RegistrationViewTests(TestCase):
-    #Tests for the registration view.
+    #Tests for the registration view
     
     def setUp(self):
         self.client = Client()
     
     
     def test_register_view_uses_correct_template(self):
-        #Test that registration view uses the correct template.
+        #Test that registration view uses the correct template
         response = self.client.get(reverse('rango:register'))
         self.assertTemplateUsed(response, 'rango/authentication/register.html')
     
     def test_register_valid_user(self):
-        #Test successful user registration.
+        #Test successful user registration
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
@@ -443,7 +446,8 @@ class RegistrationViewTests(TestCase):
         self.assertIn('_auth_user_id', self.client.session)
     
     def test_register_password_too_short(self):
-        #Test registration with password less than 8 characters.
+        #Test registration with password less than 8 characters
+
         data = {
             'username': 'newuser',
             'email': 'newuser@test.com',
@@ -458,7 +462,7 @@ class RegistrationViewTests(TestCase):
 
 
 class LoginViewTests(TestCase):
-    #Tests for the login view.
+    #Tests for the login view
     
     def setUp(self):
         self.client = Client()
@@ -466,12 +470,12 @@ class LoginViewTests(TestCase):
     
     
     def test_login_view_uses_correct_template(self):
-        #Test that login view uses the correct template.
+        #Test that login view uses the correct template
         response = self.client.get(reverse('rango:login'))
         self.assertTemplateUsed(response, 'rango/authentication/login.html')
     
     def test_login_valid_credentials(self):
-        #Test successful login with valid credentials.
+        #Test successful login 
         response = self.client.post(reverse('rango:login'), {
             'username': 'testuser',
             'password': 'correctpass'
@@ -482,7 +486,8 @@ class LoginViewTests(TestCase):
         self.assertIn('_auth_user_id', self.client.session)
     
     def test_login_invalid_credentials(self):
-        #Test login with invalid credentials."""
+        #Test unsuccessful login 
+
         response = self.client.post(reverse('rango:login'), {
             'username': 'testuser',
             'password': 'wrongpass'
@@ -492,7 +497,8 @@ class LoginViewTests(TestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
     
     def test_login_remember_me(self):
-        #Test remember me functionality.
+        #Test remember me functionality
+
         response = self.client.post(reverse('rango:login'), {
             'username': 'testuser',
             'password': 'correctpass',
@@ -503,7 +509,8 @@ class LoginViewTests(TestCase):
         self.assertEqual(self.client.session.get_expiry_age(), 1209600)
     
     def test_login_next_url_redirect(self):
-        #Test redirect to next URL after login.
+        #Test redirect to next URL after login
+
         next_url = reverse('rango:restricted')
         response = self.client.post(
             reverse('rango:login'),
@@ -519,7 +526,7 @@ class LoginViewTests(TestCase):
 
 
 class ProfileViewTests(TestCase):
-    #Tests for the profile view.
+    #Tests for the profile view
     
     def setUp(self):
         self.client = Client()
@@ -529,12 +536,14 @@ class ProfileViewTests(TestCase):
     
     
     def test_profile_view_uses_correct_template(self):
-        #Test that profile view uses the correct template.
+        #Test that profile view uses the correct template
+
         response = self.client.get(reverse('rango:profile', kwargs={'username': 'testuser'}))
         self.assertTemplateUsed(response, 'rango/profile/profile.html')
     
     def test_profile_view_context(self):
-        #Test that profile view passes correct context.
+        #Test that profile view passes correct context
+
         society = create_test_society(created_by=self.user)
         review = create_test_review(society, self.user)
         upvote = Upvote.objects.create(user=self.user, review=review)
@@ -549,7 +558,7 @@ class ProfileViewTests(TestCase):
 
 
 class EditProfileViewTests(TestCase):
-    #Tests for the edit profile view.
+    #Tests for the edit profile view
     
     def setUp(self):
         self.client = Client()
@@ -558,12 +567,13 @@ class EditProfileViewTests(TestCase):
     
     
     def test_edit_profile_view_uses_correct_template(self):
-        #Test that edit profile view uses the correct template.
+        #Test that edit profile view uses the correct template
         response = self.client.get(reverse('rango:edit_profile'))
         self.assertTemplateUsed(response, 'rango/profile/edit_profile.html')
     
     def test_edit_profile_valid_data(self):
-        #Test successful profile update.
+        #Test successful profile update
+
         data = {
             'first_name': 'John',
             'last_name': 'Doe',
@@ -584,7 +594,8 @@ class EditProfileViewTests(TestCase):
         self.assertEqual(self.user.userprofile.role, 'PRESIDENT')
     
     def test_edit_profile_requires_login(self):
-        #Test that edit profile requires authentication.
+        #Test that edit profile requires authentication
+
         self.client.logout()
         response = self.client.get(reverse('rango:edit_profile'))
         self.assertEqual(response.status_code, 302)
@@ -592,11 +603,11 @@ class EditProfileViewTests(TestCase):
 
 
 class SocietyListAndDetailTests(TestCase):
-    #Tests for society list and detail views.
+    #Tests for society list and detail views
     
     def setUp(self):
         self.client = Client()
-        # Create a president user with explicit password
+        # Create a president user with password
         self.user = create_test_user(
             username='president',
             password='testpass123',  
@@ -610,7 +621,7 @@ class SocietyListAndDetailTests(TestCase):
         self.society = create_test_society('Football Club', self.user, [self.category])
     
     def test_society_list_view(self):
-        #Test society list view.
+        #Test society list view
 
         response = self.client.get(reverse('rango:society_list'))
         self.assertEqual(response.status_code, 200)
@@ -618,7 +629,7 @@ class SocietyListAndDetailTests(TestCase):
         self.assertEqual(response.context['societies'].count(), 1)
     
     def test_society_detail_view(self):
-        #Test society detail view.
+        #Test society detail view
 
         response = self.client.get(reverse('rango:society_detail', kwargs={'pk': self.society.pk}))
         self.assertEqual(response.status_code, 200)
@@ -629,7 +640,7 @@ class SocietyListAndDetailTests(TestCase):
         self.assertIn('review_form', response.context)
     
     def test_create_society_view(self):
-        #Test create society view.
+        #Test create society view
 
         # Test GET - user is already logged in from setUp
         response = self.client.get(reverse('rango:create_society'))
@@ -649,7 +660,7 @@ class SocietyListAndDetailTests(TestCase):
         self.assertEqual(society.created_by, self.user)
     
     def test_create_society_requires_president_role(self):
-        #Test that only presidents can create societies.
+        #Test that only presidents can create societies
 
         # Create a student user and log in as student
         student_user = create_test_user(
@@ -667,7 +678,7 @@ class SocietyListAndDetailTests(TestCase):
         self.client.login(username='president', password='testpass123')
     
     def test_edit_society_view(self):
-        #Test edit society view.
+        #Test edit society view
 
         # User is already logged in as president from setUp
         response = self.client.get(reverse('rango:edit_society', kwargs={'pk': self.society.pk}))
@@ -687,7 +698,7 @@ class SocietyListAndDetailTests(TestCase):
         self.assertEqual(self.society.name, 'Updated Society')
     
     def test_edit_society_unauthorized(self):
-        #Test that non-creators cannot edit society.
+        #Test that non-creators can't edit society
 
         other_user = create_test_user(
             username='otheruser',
@@ -704,10 +715,105 @@ class SocietyListAndDetailTests(TestCase):
         self.client.login(username='president', password='testpass123')
     
     def test_delete_society_view(self):
-        #Test delete society view.
-        
+        #Test delete society view
+
         # User is already logged in as president from setUp
         response = self.client.post(reverse('rango:delete_society', kwargs={'pk': self.society.pk}))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse('rango:index'))
         self.assertFalse(Society.objects.filter(pk=self.society.pk).exists())
+
+class RatingAndReviewTests(TestCase):
+    #Tests for rating and review functionality
+    
+    def setUp(self):
+        self.client = Client()
+        self.user = create_test_user('testuser', password='testpass123')
+        self.society = create_test_society(created_by=self.user)
+        self.client.login(username='testuser', password='testpass123')
+    
+    def test_rate_society(self):
+        #Test rating a society
+
+        response = self.client.post(
+            reverse('rango:rate_society', kwargs={'pk': self.society.pk}),
+            {'star': 4}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        rating = Rating.objects.get(user=self.user, society=self.society)
+        self.assertEqual(rating.star, 4)
+    
+    def test_update_rating(self):
+        #Test updating an existing rating
+
+        # Create initial rating
+        self.client.post(
+            reverse('rango:rate_society', kwargs={'pk': self.society.pk}),
+            {'star': 3}
+        )
+        
+        # Update rating
+        response = self.client.post(
+            reverse('rango:rate_society', kwargs={'pk': self.society.pk}),
+            {'star': 5}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        rating = Rating.objects.get(user=self.user, society=self.society)
+        self.assertEqual(rating.star, 5)
+    
+    def test_add_review(self):
+        #Test adding a review
+
+        response = self.client.post(
+            reverse('rango:add_review', kwargs={'pk': self.society.pk}),
+            {'comment': 'Good'}
+        )
+        self.assertEqual(response.status_code, 302)
+        
+        review = Review.objects.get(user=self.user, society=self.society)
+        self.assertEqual(review.comment, 'Good')
+    
+    def test_duplicate_review(self):
+        #Test that users cannot add multiple reviews for same society
+
+        # Create first review
+        create_test_review(self.society, self.user, 'First review')
+        
+        # Try to add second review
+        response = self.client.post(
+            reverse('rango:add_review', kwargs={'pk': self.society.pk}),
+            {'comment': 'Second review'}
+        )
+        
+        # Should still only have one review
+        self.assertEqual(Review.objects.filter(user=self.user, society=self.society).count(), 1)
+    
+    def test_upvote_review(self):
+        #Test upvoting a review
+
+        # Create review from another user
+        other_user = create_test_user('otheruser', password='testpass123')
+        review = create_test_review(self.society, other_user, 'Good')
+        
+        response = self.client.post(reverse('rango:upvote_review', kwargs={'review_id': review.pk}))
+        self.assertEqual(response.status_code, 302)
+        
+        upvote = Upvote.objects.filter(user=self.user, review=review)
+        self.assertTrue(upvote.exists())
+    
+    def test_upvote_toggle(self):
+        #Test that upvote can be removed
+
+        # Create review from another user
+        other_user = create_test_user('otheruser', password='testpass123')
+        review = create_test_review(self.society, other_user, 'Good')
+        
+        # First upvote
+        self.client.post(reverse('rango:upvote_review', kwargs={'review_id': review.pk}))
+        self.assertTrue(Upvote.objects.filter(user=self.user, review=review).exists())
+        
+        # Should remove upvote
+        self.client.post(reverse('rango:upvote_review', kwargs={'review_id': review.pk}))
+        self.assertFalse(Upvote.objects.filter(user=self.user, review=review).exists())
