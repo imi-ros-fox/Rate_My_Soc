@@ -12,8 +12,7 @@
         {% block extra_css %}{% endblock %}
     </head>
     <body>
-        <!-- Django messages disabled - AJAX operations update silently -->
-        <!-- {% if messages %}
+        {% if messages %}
           <div class="messages">
             {% for message in messages %}
               <div class="alert
@@ -22,7 +21,7 @@
               </div>
             {% endfor %}
           </div>
-        {% endif %} -->
+        {% endif %} 
         {% include 'rango/header.html' %}
         <div class="page-main">
             {% block body_block %}

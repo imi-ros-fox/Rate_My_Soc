@@ -143,8 +143,9 @@ def user_login(request):
             else:
                 return HttpResponse("Your Rate my Society account is disabled.")
         else:
+            messages.error(request, "Invalid login details supplied")
             return render(request, 'rango/authentication/login.html')
-            messages.error(request, "Invalid login details supplied.")
+            
     else:
         return render(request, 'rango/authentication/login.html')
 
