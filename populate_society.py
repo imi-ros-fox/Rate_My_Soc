@@ -27,20 +27,20 @@ def populate():
 
     # Define societies
     societies = [
-        {'name': 'Football Club', 'description': 'A society for football enthusiasts.', 'categories': ['Sports']},
-        {'name': 'Drama Society', 'description': 'For those interested in acting and theater.', 'categories': ['Arts']},
-        {'name': 'Computer Science Society', 'description': 'Tech lovers unite!', 'categories': ['Academic']},
-        {'name': 'Debate Club', 'description': 'Sharpen your debating skills.', 'categories': ['Academic', 'Social']},
-        {'name': 'Music Society', 'description': 'For musicians and music lovers.', 'categories': ['Arts', 'Cultural']},
-        {'name': 'Chess Club', 'description': 'Strategic minds welcome.', 'categories': ['Academic', 'Social']},
-        {'name': 'Photography Club', 'description': 'Capture the world through lenses.', 'categories': ['Arts']},
-        {'name': 'Volunteering Society', 'description': 'Give back to the community.', 'categories': ['Social']},
+        {'name': 'Football Club', 'description': 'A society for football enthusiasts.', 'categories': ['Sports'], 'image': 'football_society_image.jpg'},
+        {'name': 'Drama Society', 'description': 'For those interested in acting and theater.', 'categories': ['Arts'], 'image': 'drama_society_image.jpg'},
+        {'name': 'Tech Society', 'description': 'Tech lovers unite!', 'categories': ['Academic'], 'image': 'tech_society_image.jpg'},
+        {'name': 'Debate Club', 'description': 'Sharpen your debating skills.', 'categories': ['Academic', 'Social'], 'image': 'debate_society_image.jpg'},
+        {'name': 'Music Society', 'description': 'For musicians and music lovers.', 'categories': ['Arts', 'Cultural'], 'image': 'music_society_image.jpg'},
+        {'name': 'Chess Club', 'description': 'Strategic minds welcome.', 'categories': ['Academic', 'Social'], 'image': 'chess_society_image.png'},
+        {'name': 'Photography Club', 'description': 'Capture the world through lenses.', 'categories': ['Arts'], 'image': 'photography_society_image.png'},
+        {'name': 'Volunteering Society', 'description': 'Give back to the community.', 'categories': ['Social'], 'image': 'volunteering_society.jpg'},
     ]
 
     # Create societies
     for soc_data in societies:
         cat_list = [cat_objects[cat] for cat in soc_data['categories']]
-        add_society(soc_data['name'], soc_data['description'], user, cat_list)
+        add_society(soc_data['name'], soc_data['description'], user, cat_list, soc_data.get('image', ''))
 
     # Print out the societies and their categories
     for s in Society.objects.all():
@@ -48,8 +48,10 @@ def populate():
         print(f'  Categories: {[cat.name for cat in s.categories.all()]}')
 
 
-def add_society(name, description, created_by, categories):
+def add_society(name, description, created_by, categories, image=''):
     s = Society.objects.get_or_create(name=name, defaults={'description': description, 'created_by': created_by})[0]
+    if image:
+        s.image = f'society_images/{image}'
     for cat in categories:
         s.categories.add(cat)
     s.save()
