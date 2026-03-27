@@ -250,43 +250,6 @@ def visitor_cookie_handler(request):
     request.session['visits'] = visits
 
 @login_required
-def create_soc(request):
-    if request.user.userprofile.role != 'PRESIDENT':
-        messages.error(request, 'Only Society Presidents can create societies.')
-        return redirect('rango:index')
-
-    categories = Category.objects.all()
-
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        image = request.FILES.get('image')
-        category_ids = request.POST.getlist('tags[]')
-
-        if not name or not description or not category_ids:
-            messages.error(request, 'Please fill in all required fields and select at least one category.')
-            return render(request, 'rango/create_soc.html', {'categories': categories})
-
-        society = Society.objects.create(
-            name=name,
-            description=description,
-            image=image,
-            created_by=request.user
-        )
-        society.categories.set(category_ids)
-        society.save()
-
-        messages.success(request, f'Society "{society.name}" created successfully!')
-        return redirect('rango:index')
-
-    return render(request, 'rango/create_soc.html', {'categories': categories})
-
-@login_required
-def society_list(request):
-    societies = Society.objects.all()
-    return render(request, 'rango/society/society_list.html', {'societies': societies})
-
-@login_required
 def create_society(request):
 
     if request.user.userprofile.role != 'PRESIDENT':
@@ -340,21 +303,6 @@ def delete_society(request, pk):
     return render(request, 'rango/society/delete_society.html', {'society': society})
 
 @login_required
-def category_list(request):
-    categories = Category.objects.all().order_by('name')
-    return render(request, 'rango/category_list.html', {'categories': categories})
-
-@login_required
-def category_detail(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-    societies = Society.objects.filter(categories=category)
-    context = {
-        'category': category,
-        'societies': societies
-    }
-    return render(request, 'rango/category_detail.html', context)
-
-@login_required
 def create_category(request):
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -369,31 +317,6 @@ def create_category(request):
 
     return render(request, 'rango/society/create_category.html', {'form': form})
 
-@login_required
-def edit_category(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-
-    if request.method == 'POST':
-        form = CategoryForm(request.POST, instance=category)
-
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Category updated successfully!')
-            return redirect('rango:category_list')
-
-    else:
-        form = CategoryForm(instance=category)
-
-    return render(request, 'rango/edit_category.html', {'form': form, 'category': category})
-
-@login_required
-def delete_category(request, pk):
-    category = get_object_or_404(Category, pk=pk)
-    if request.method == 'POST':
-        category.delete()
-        messages.success(request, 'Category deleted successfully!')
-        return redirect('rango:category_list')
-    return render(request, 'rango/delete_category.html', {'category': category})
 
 @login_required
 def society_detail(request, pk):
@@ -520,6 +443,11 @@ def upvote_review(request, review_id):
     
     return redirect('rango:society_detail', pk=review.society.pk)
 
+@login_required
+def society_list(request):
+    societies = Society.objects.all()
+    return render(request, 'rango/society/society_list.html', {'societies': societies})
+
 def search_societies(request):
     query = request.GET.get('q')
     results = []
@@ -533,27 +461,6 @@ def search_societies(request):
         'results': results
     }
     return render(request, 'rango/home/search_results.html', context)
-
-def top_rated_societies(request):
-    N = 5
-    societies = Society.objects.annotate(
-        avg_rating=Avg('rating__star')
-    ).filter(
-        avg_rating__isnull=False
-    ).order_by('-avg_rating')[:N]
-    context = {
-        'societies': societies,
-        'N': N
-    }
-    return render(request, 'rango/top_societies.html', context)
-
-@login_required
-def my_reviews(request):
-    reviews = Review.objects.filter(user=request.user).select_related('society').order_by('-created_at')
-
-    return render(request, 'rango/society/my_reviews.html', {
-        'reviews': reviews
-    })
 
 @login_required
 def edit_review(request, pk):
@@ -574,6 +481,14 @@ def edit_review(request, pk):
     })
 
 @login_required
+def delete_upvote(request, pk):
+    upvote = get_object_or_404(Upvote, pk=pk, user=request.user)
+    society_pk = upvote.review.society.pk
+    upvote.delete()
+    messages.success(request, "Upvote removed")
+    return redirect('rango:society_detail', pk=society_pk)
+
+@login_required
 def delete_review(request, pk):
     review = get_object_or_404(Review, pk=pk, user=request.user)
     if request.method == 'POST':
@@ -584,22 +499,7 @@ def delete_review(request, pk):
     return render(request, 'rango/society/delete_review.html', {
         'review': review
     })
-
-@login_required
-def my_upvotes(request):
-    upvotes = Upvote.objects.filter(user=request.user).select_related('review', 'review__society').order_by('-created_at')
-
-    return render(request, 'rango/society/my_upvotes.html', {
-        'upvotes': upvotes
-    })
-
-@login_required
-def delete_upvote(request, pk):
-    upvote = get_object_or_404(Upvote, pk=pk, user=request.user)
-    society_pk = upvote.review.society.pk
-    upvote.delete()
-    messages.success(request, "Upvote removed")
-    return redirect('rango:society_detail', pk=society_pk)
+    
 
 def about(request):
     visits = request.session.get('visits', 0)
